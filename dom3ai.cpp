@@ -16,6 +16,9 @@
 #include <QProgressDialog>
 #include <QtCore>
 #include <QVector>
+#include <QFileInfo>
+#include <QSettings>
+#include <QCloseEvent>
 #include "dom3ai.h"
 #include "ui_dom3ai.h"
 
@@ -32,7 +35,7 @@ Dom3AI::Dom3AI(QWidget *parent) :
     ui(new Ui::Dom3AI)
 {
     ui->setupUi(this);
-    //loadTextFile();
+    readSettings();
 }
 
 Dom3AI::~Dom3AI()
@@ -62,12 +65,8 @@ void Dom3AI::on_findButton_clicked()
         std::stringbuf StringBuffer;
         std::ostream os(&StringBuffer);
         os << "distances: ";
-        //if (num_vertices(G) < 150) {
-            std::copy(d, d + number_of_vertices, std::ostream_iterator<int>(os, " "));
-            os << std::endl;
-       // }
-
-        os << "adjacent vertices: ";
+        std::copy(d, d + number_of_vertices, std::ostream_iterator<int>(os, " "));
+        os << std::endl << "adjacent vertices: ";
 
         typedef graph_traits<Graph>::adjacency_iterator adj_iter;
 
@@ -170,11 +169,20 @@ void Dom3AI::on_chooseNationsRadio_clicked(bool checked)
     ui->chooseNationsButton->setEnabled(checked);
 }
 
-void Dom3AI::shootScreen()
+void Dom3AI::poll_map_file()
 {
     std::cout << "Here" << std::endl;
     dialog.setValue(counter++);
-    QTimer::singleShot(1000, this, SLOT(shootScreen()));
+    QTimer::singleShot(1000, this, SLOT(poll_map_file()));
+}
+
+void Dom3AI::closeEvent(QCloseEvent * event) {
+//    if (userReallyWantsToQuit()) {
+        writeSettings();
+        event->accept();
+//    } else {
+//        event->ignore();
+//    }
 }
 
 void Dom3AI::on_generateGameButton_clicked()
@@ -200,18 +208,45 @@ void Dom3AI::on_generateGameButton_clicked()
          << "--textonly"
          << "-d";
 
-    QString program = "F://dominions3//dom3.exe";
+
+    QString program = ui->dom3Text->text();
 
     QProcess *myProcess = new QProcess();
-    myProcess->setWorkingDirectory("F://dominions3");
-    //myProcess->start(program, args);
-
+    QFileInfo exe = QFileInfo(program);
+    myProcess->setWorkingDirectory(exe.absolutePath());
+    myProcess->start(program, args);
 
     dialog.setModal(true);
     dialog.show();
 
     counter = 0;
-    QTimer::singleShot(1000, this, SLOT(shootScreen()));
+    QTimer::singleShot(1000, this, SLOT(poll_map_file()));
 
 }
 
+
+void Dom3AI::on_dom3BrowseButton_clicked()
+{
+    QString fileName = QFileDialog::getOpenFileName(this, tr("Dominions 3 Exectuable"),
+                                                     "",
+                                                     tr("Dominions 3 Exectuable (*)"));
+    ui->dom3Text->setText(fileName);
+}
+
+void Dom3AI::writeSettings()
+ {
+     QSettings settings("Larz Soft", "dom3ai");
+
+     settings.beginGroup("Dom3AI");
+     settings.setValue("dom3exe", ui->dom3Text->text());
+     settings.endGroup();
+ }
+
+ void Dom3AI::readSettings()
+ {
+     QSettings settings("Larz Soft", "dom3ai");
+
+     settings.beginGroup("Dom3AI");
+     ui->dom3Text->setText(settings.value("dom3exe", "").toString());
+     settings.endGroup();
+ }

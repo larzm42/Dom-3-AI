@@ -24,4 +24,4 @@ OTHER_FILES +=
 RESOURCES += \
     dom3ai.qrc
 
-INCLUDEPATH += /home/lmoore/boost_1_49_0
+INCLUDEPATH += c://Users//lamoor//boost_1_49_0
