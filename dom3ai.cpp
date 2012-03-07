@@ -16,8 +16,8 @@
 #include <QProgressDialog>
 #include <QtCore>
 #include <QVector>
-#include "textfinder.h"
-#include "ui_textfinder.h"
+#include "dom3ai.h"
+#include "ui_dom3ai.h"
 
 using namespace boost;
 
@@ -27,20 +27,20 @@ typedef std::pair<int, int> Edge;
 
 Graph G;
 
-TextFinder::TextFinder(QWidget *parent) :
+Dom3AI::Dom3AI(QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::TextFinder)
+    ui(new Ui::Dom3AI)
 {
     ui->setupUi(this);
     //loadTextFile();
 }
 
-TextFinder::~TextFinder()
+Dom3AI::~Dom3AI()
 {
     delete ui;
 }
 
-void TextFinder::on_findButton_clicked()
+void Dom3AI::on_findButton_clicked()
 {
     QString searchString = ui->lineEdit->text();
 
@@ -82,7 +82,7 @@ void TextFinder::on_findButton_clicked()
     }
 }
 
-void TextFinder::loadTextFile(QString fileName)
+void Dom3AI::loadTextFile(QString fileName)
 {
     QFile inputFile(fileName);
     inputFile.open(QIODevice::ReadOnly);
@@ -131,7 +131,7 @@ void TextFinder::loadTextFile(QString fileName)
 }
 
 
-void TextFinder::on_mapBrowseButton_clicked()
+void Dom3AI::on_mapBrowseButton_clicked()
 {
     QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"),
                                                      "",
@@ -140,44 +140,44 @@ void TextFinder::on_mapBrowseButton_clicked()
     loadTextFile(fileName);
 }
 
-void TextFinder::on_chooseNationsButton_clicked()
+void Dom3AI::on_chooseNationsButton_clicked()
 {
 }
 
-void TextFinder::on_existingMapRadio_clicked(bool checked)
+void Dom3AI::on_existingMapRadio_clicked(bool checked)
 {
     ui->numProvinceText->setEnabled(!checked);
     ui->mapText->setEnabled(checked);
     ui->mapBrowseButton->setEnabled(checked);
 }
 
-void TextFinder::on_randomMapRadio_clicked(bool checked)
+void Dom3AI::on_randomMapRadio_clicked(bool checked)
 {
     ui->numProvinceText->setEnabled(checked);
     ui->mapText->setEnabled(!checked);
     ui->mapBrowseButton->setEnabled(!checked);
 }
 
-void TextFinder::on_randomNationsRadio_clicked(bool checked)
+void Dom3AI::on_randomNationsRadio_clicked(bool checked)
 {
     ui->numRandomNationsCombo->setEnabled(checked);
     ui->chooseNationsButton->setEnabled(!checked);
 }
 
-void TextFinder::on_chooseNationsRadio_clicked(bool checked)
+void Dom3AI::on_chooseNationsRadio_clicked(bool checked)
 {
     ui->numRandomNationsCombo->setEnabled(!checked);
     ui->chooseNationsButton->setEnabled(checked);
 }
 
-void TextFinder::shootScreen()
+void Dom3AI::shootScreen()
 {
     std::cout << "Here" << std::endl;
     dialog.setValue(counter++);
     QTimer::singleShot(1000, this, SLOT(shootScreen()));
 }
 
-void TextFinder::on_generateGameButton_clicked()
+void Dom3AI::on_generateGameButton_clicked()
 {
     QStringList args;
     args << "--makemap" << "testFromQt"

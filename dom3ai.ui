@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>TextFinder</class>
- <widget class="QWidget" name="TextFinder">
+ <class>Dom3AI</class>
+ <widget class="QWidget" name="Dom3AI">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
     <width>488</width>
-    <height>562</height>
+    <height>627</height>
    </rect>
   </property>
   <property name="windowTitle">

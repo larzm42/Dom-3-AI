@@ -1,10 +1,10 @@
 #include <QtGui/QApplication>
-#include "textfinder.h"
+#include "dom3ai.h"
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    TextFinder w;
+    Dom3AI w;
     w.show();
     
     return a.exec();

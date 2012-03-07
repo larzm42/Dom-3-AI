@@ -1,22 +1,22 @@
-#ifndef TEXTFINDER_H
-#define TEXTFINDER_H
+#ifndef Dom3AI_H
+#define Dom3AI_H
 
 #include <QWidget>
 #include <QProgressDialog>
 //#include "myobject.h"
 
 namespace Ui {
-class TextFinder;
+class Dom3AI;
 }
 
-class TextFinder : public QWidget
+class Dom3AI : public QWidget
 {
     Q_OBJECT
 
 
 public:
-    explicit TextFinder(QWidget *parent = 0);
-    ~TextFinder();
+    explicit Dom3AI(QWidget *parent = 0);
+    ~Dom3AI();
     
 private slots:
     void on_findButton_clicked();
@@ -39,11 +39,11 @@ private slots:
     //void handleFinished();
 
 private:
-    Ui::TextFinder *ui;
+    Ui::Dom3AI *ui;
     void loadTextFile(QString fileName);
      QProgressDialog dialog;
      int counter;
    // MyObject myObject;
 };
 
-#endif // TEXTFINDER_H
+#endif // Dom3AI_H
