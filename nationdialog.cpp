@@ -6,7 +6,6 @@ NationDialog::NationDialog(QWidget *parent) :
     ui(new Ui::NationDialog)
 {
     ui->setupUi(this);
-    setupList();
 }
 
 NationDialog::~NationDialog()
@@ -14,18 +13,38 @@ NationDialog::~NationDialog()
     delete ui;
 }
 
+void NationDialog::setNationList(QList<Dom3AI::NationData> nationList) {
+    nations = nationList;
+    setupList();
+}
+
+
 void NationDialog::setupList() {
-    QListWidgetItem * listWidgetItem1 = new QListWidgetItem(tr("Oak"), ui->nationList);
-    listWidgetItem1->setFlags( listWidgetItem1->flags() | Qt::ItemIsUserCheckable);
-    listWidgetItem1->setCheckState(Qt::Unchecked);
+    QListIterator<Dom3AI::NationData> i(nations);
+    while (i.hasNext()) {
+        QListWidgetItem * listWidgetItem = new QListWidgetItem(i.next().name, ui->nationList);
+        listWidgetItem->setFlags( listWidgetItem->flags() | Qt::ItemIsUserCheckable);
+        listWidgetItem->setCheckState(Qt::Unchecked);
+    }
+}
 
-    QListWidgetItem * listWidgetItem2 = new QListWidgetItem(tr("Pine"), ui->nationList);
-    listWidgetItem2->setFlags( listWidgetItem2->flags() | Qt::ItemIsUserCheckable);
-    listWidgetItem2->setCheckState(Qt::Unchecked);
+QList<Dom3AI::NationData> NationDialog::getSelectedNations() {
+    QList<Dom3AI::NationData> selectedNations;
+    int count = ui->nationList->count();
+    for(int index = 0; index < count; index++)
+    {
+        QListWidgetItem * listItem = ui->nationList->item(index);
+        if (listItem->checkState() == Qt::Checked) {
+            QListIterator<Dom3AI::NationData> nationIter(nations);
+            while (nationIter.hasNext()) {
+                Dom3AI::NationData data = nationIter.next();
+                if (data.name == listItem->text()) {
+                    selectedNations.append(data);
+                    break;
+                }
+            }
+        }
+    }
 
-    QListWidgetItem * listWidgetItem3 = new QListWidgetItem(tr("Ash"), ui->nationList);
-    listWidgetItem3->setFlags( listWidgetItem3->flags() | Qt::ItemIsUserCheckable);
-    listWidgetItem3->setCheckState(Qt::Unchecked);
-
-    ui->nationList->activateWindow();
+    return selectedNations;
 }

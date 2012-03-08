@@ -17,6 +17,11 @@ public:
     explicit Dom3AI(QWidget *parent = 0);
     ~Dom3AI();
 
+    struct NationData {
+        int number;
+        QString name;
+    };
+
 protected:
      void closeEvent(QCloseEvent *event);
 
@@ -36,10 +41,23 @@ private:
     Ui::Dom3AI *ui;
     QProgressDialog dialog;
     int counter;
+    QList<NationData> earlyNations;
+    QList<NationData> middleNations;
+    QList<NationData> lateNations;
+    QList<NationData> selectedNations;
 
     void readSettings();
     void writeSettings();
     void loadTextFile(QString fileName);
+
+    enum SetupSection {
+        None,
+        Early,
+        Middle,
+        Late,
+        Map
+    };
+
 };
 
 #endif // Dom3AI_H

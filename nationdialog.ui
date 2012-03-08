@@ -6,12 +6,12 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>300</height>
+    <width>211</width>
+    <height>449</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>AI Nation Selection</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>

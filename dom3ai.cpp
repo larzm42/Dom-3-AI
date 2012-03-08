@@ -142,7 +142,16 @@ void Dom3AI::on_mapBrowseButton_clicked()
 void Dom3AI::on_chooseNationsButton_clicked()
 {
     NationDialog dialog;
+    if (ui->eraCombo->currentText() == "Early") {
+        dialog.setNationList(earlyNations);
+    } else if (ui->eraCombo->currentText() == "Middle") {
+        dialog.setNationList(middleNations);
+    } else if (ui->eraCombo->currentText() == "Late") {
+        dialog.setNationList(lateNations);
+    }
     dialog.exec();
+    selectedNations = dialog.getSelectedNations();
+    ui->chooseNationsButton->setText(QString::number(selectedNations.size()) + " Chosen");
 }
 
 void Dom3AI::on_existingMapRadio_clicked(bool checked)
@@ -251,4 +260,54 @@ void Dom3AI::writeSettings()
      settings.beginGroup("Dom3AI");
      ui->dom3Text->setText(settings.value("dom3exe", "").toString());
      settings.endGroup();
+
+     QFile setupFile(":/settings.txt");
+     setupFile.open(QIODevice::ReadOnly);
+
+     QTextStream in(&setupFile);
+     QString line;
+
+
+     Dom3AI::SetupSection section = None;
+     while (!in.atEnd()) {
+         line = in.readLine();
+         if (line.startsWith("[EA]")) {
+             section = Early;
+         } else if (line.startsWith("[MA]")) {
+             section = Middle;
+         } else if (line.startsWith("[LA]")) {
+             section = Late;
+         } else if (line.startsWith("[MAP]")) {
+             section = Map;
+         } else {
+             QStringList strList = line.split(" ");
+             if (!strList.at(0).startsWith("--")) {
+                 if (section == Map) {
+
+                 } else {
+                     if (strList.size() > 1) {
+                         NationData data;
+                         data.number = strList.at(0).toInt();
+                         data.name = strList.at(1);
+                         if (strList.size() > 2) {
+                             data.name = data.name + " " + strList.at(2);
+                         }
+                         if (strList.size() > 3) {
+                             data.name = data.name + " " + strList.at(3);
+                         }
+                         if (section == Early) {
+                             earlyNations.append(data);
+                         } else if (section == Middle) {
+                             middleNations.append(data);
+                         } else if (section == Late) {
+                             lateNations.append(data);
+                         }
+                     }
+                 }
+             }
+
+         }
+     }
+
  }
+
