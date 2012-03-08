@@ -19,6 +19,7 @@
 #include <QFileInfo>
 #include <QSettings>
 #include <QCloseEvent>
+#include "nationdialog.h"
 #include "dom3ai.h"
 #include "ui_dom3ai.h"
 
@@ -129,7 +130,6 @@ void Dom3AI::loadTextFile(QString fileName)
 
 }
 
-
 void Dom3AI::on_mapBrowseButton_clicked()
 {
     QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"),
@@ -141,6 +141,8 @@ void Dom3AI::on_mapBrowseButton_clicked()
 
 void Dom3AI::on_chooseNationsButton_clicked()
 {
+    NationDialog dialog;
+    dialog.exec();
 }
 
 void Dom3AI::on_existingMapRadio_clicked(bool checked)

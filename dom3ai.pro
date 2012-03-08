@@ -11,13 +11,16 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp \
-    dom3ai.cpp
+    dom3ai.cpp \
+    nationdialog.cpp
 
 HEADERS  += \
-    dom3ai.h
+    dom3ai.h \
+    nationdialog.h
 
 FORMS    += \
-    dom3ai.ui
+    dom3ai.ui \
+    nationdialog.ui
 
 OTHER_FILES +=
 
