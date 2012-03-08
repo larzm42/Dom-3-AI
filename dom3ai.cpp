@@ -2,10 +2,13 @@
 #include <iostream>
 #include <sstream>
 #include <fstream>
+#include <ctime>
 #include <boost/graph/visitors.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/breadth_first_search.hpp>
 #include <boost/graph/graph_utility.hpp>
+#include <boost/random/mersenne_twister.hpp>
+#include <boost/random/uniform_int_distribution.hpp>
 #include <QtCore/QCoreApplication>
 #include <QtCore/QFile>
 #include <QtCore/QTextStream>
@@ -29,12 +32,46 @@ using namespace boost;
 typedef adjacency_list<vecS, vecS, undirectedS> Graph;
 typedef std::pair<int, int> Edge;
 
+QString riverpart = "100";
+QString seapart = "0";
+QString mountpart = "50";
+QString forestpart = "30";
+QString farmpart = "20";
+QString wastepart = "10";
+QString swamppart = "10";
+QString mapsize1 = "1600";
+QString mapsize2 = "1200";
+QString mapprov = "150";
+QString mapgcol1 = "50";
+QString mapgcol2 = "100";
+QString mapgcol3 = "50";
+QString mapgcol4 = "255";
+QString mapscol1 = "20";
+QString mapscol2 = "30";
+QString mapscol3 = "110";
+QString mapscol4 = "200";
+QString mapbcol1 = "100";
+QString mapbcol2 = "200";
+QString mapbcol3 = "20";
+QString mapbcol4 = "100";
+QString mapsbcol1 = "40";
+QString mapsbcol2 = "120";
+QString mapsbcol3 = "200";
+QString mapsbcol4 = "100";
+QString mapnoise = "100";
+QString borderwidth = "15";
+
+QString mapFileName;
+
 Graph G;
+random::mt19937 gen;
+
 
 Dom3AI::Dom3AI(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::Dom3AI)
 {
+    gen.seed(static_cast<unsigned int>(std::time(0)));
     ui->setupUi(this);
     readSettings();
 }
@@ -182,56 +219,63 @@ void Dom3AI::on_chooseNationsRadio_clicked(bool checked)
 
 void Dom3AI::poll_map_file()
 {
-    std::cout << "Here" << std::endl;
-    dialog.setValue(counter++);
-    QTimer::singleShot(1000, this, SLOT(poll_map_file()));
+    QFileInfo exe = QFileInfo(ui->dom3Text->text());
+    QString fileToCheck = exe.absolutePath() + "/maps/" + mapFileName + ".map";
+    std::cout << "Here" << fileToCheck.toStdString() << std::endl;
+    QFileInfo mapFile = QFileInfo(exe.absolutePath() + "/maps/" + mapFileName + ".map");
+    if (mapFile.exists()) {
+        dialog.close();
+    } else {
+        dialog.setValue(counter++);
+        QTimer::singleShot(1000, this, SLOT(poll_map_file()));
+    }
 }
 
 void Dom3AI::closeEvent(QCloseEvent * event) {
-//    if (userReallyWantsToQuit()) {
-        writeSettings();
-        event->accept();
-//    } else {
-//        event->ignore();
-//    }
+    writeSettings();
+    event->accept();
 }
 
 void Dom3AI::on_generateGameButton_clicked()
 {
-    QStringList args;
-    args << "--makemap" << "testFromQt"
-         << "--riverpart" << "100"
-         << "--seapart" << "0"
-         << "--mountpart" << "50"
-         << "--forestpart" << "30"
-         << "--farmpart" << "20"
-         << "--wastepart" << "10"
-         << "--swamppart" << "10"
-         << "--mapaa"
-         << "--mapsize" << "1600" << "1200"
-         << "--mapprov" << "150"
-         << "--mapgcol" << "50" << "100" << "50" << "255"
-         << "--mapscol" << "20" << "30" << "110" << "200"
-         << "--mapbcol" << "100" << "200" << "20" << "100"
-         << "--mapsbcol" << "40" << "120" << "200" << "100"
-         << "--mapnoise" << "100"
-         << "--borderwidth" << "15"
-         << "--textonly"
-         << "-d";
+    if (ui->randomMapRadio->isChecked() && ui->numProvinceText->text().size() > 0) {
+        random::uniform_int_distribution<> dist(10000, 99999);
+        int i = dist(gen);
+        mapFileName = "randomMap" + QString::number(i);
+        QStringList args;
+        args << "--makemap" << mapFileName
+             << "--riverpart" << riverpart
+             << "--seapart" << seapart
+             << "--mountpart" << mountpart
+             << "--forestpart" << forestpart
+             << "--farmpart" << farmpart
+             << "--wastepart" << wastepart
+             << "--swamppart" << swamppart
+             << "--mapaa"
+             << "--mapsize" << mapsize1 << mapsize2
+             << "--mapprov" << ui->numProvinceText->text()
+             << "--mapgcol" << mapgcol1 << mapgcol2 << mapgcol3 << mapgcol4
+             << "--mapscol" << mapscol1 << mapscol2 << mapscol3 << mapscol4
+             << "--mapbcol" << mapbcol1 << mapbcol2 << mapbcol3 << mapbcol4
+             << "--mapsbcol" << mapsbcol1 << mapsbcol2 << mapsbcol3 << mapsbcol4
+             << "--mapnoise" << mapnoise
+             << "--borderwidth" << borderwidth
+             << "--textonly"
+             << "-d";
 
+        QString program = ui->dom3Text->text();
 
-    QString program = ui->dom3Text->text();
+        QProcess *myProcess = new QProcess();
+        QFileInfo exe = QFileInfo(program);
+        myProcess->setWorkingDirectory(exe.absolutePath());
+        myProcess->start(program, args);
 
-    QProcess *myProcess = new QProcess();
-    QFileInfo exe = QFileInfo(program);
-    myProcess->setWorkingDirectory(exe.absolutePath());
-    myProcess->start(program, args);
+        dialog.setModal(true);
+        dialog.show();
 
-    dialog.setModal(true);
-    dialog.show();
-
-    counter = 0;
-    QTimer::singleShot(1000, this, SLOT(poll_map_file()));
+        counter = 0;
+        QTimer::singleShot(1000, this, SLOT(poll_map_file()));
+    }
 
 }
 
@@ -283,7 +327,48 @@ void Dom3AI::writeSettings()
              QStringList strList = line.split(" ");
              if (!strList.at(0).startsWith("--")) {
                  if (section == Map) {
-
+                     if (strList.at(0).startsWith("riverpart")) {
+                         riverpart = strList.at(1);
+                     } else if (strList.at(0).startsWith("seapart")) {
+                         seapart = strList.at(1);
+                     } else if (strList.at(0).startsWith("mountpart")) {
+                         mountpart = strList.at(1);
+                     } else if (strList.at(0).startsWith("forestpart")) {
+                         forestpart = strList.at(1);
+                     } else if (strList.at(0).startsWith("farmpart")) {
+                         farmpart = strList.at(1);
+                     } else if (strList.at(0).startsWith("wastepart")) {
+                         wastepart = strList.at(1);
+                     } else if (strList.at(0).startsWith("swamppart")) {
+                         swamppart = strList.at(1);
+                     } else if (strList.at(0).startsWith("mapsize")) {
+                         mapsize1 = strList.at(1);
+                         mapsize2 = strList.at(2);
+                     } else if (strList.at(0).startsWith("mapgcol")) {
+                         mapgcol1 = strList.at(1);
+                         mapgcol2 = strList.at(2);
+                         mapgcol3 = strList.at(3);
+                         mapgcol4 = strList.at(4);
+                     } else if (strList.at(0).startsWith("mapscol")) {
+                         mapscol1 = strList.at(1);
+                         mapscol2 = strList.at(2);
+                         mapscol3 = strList.at(3);
+                         mapscol4 = strList.at(4);
+                     } else if (strList.at(0).startsWith("mapbcol")) {
+                         mapbcol1 = strList.at(1);
+                         mapbcol2 = strList.at(2);
+                         mapbcol3 = strList.at(3);
+                         mapbcol4 = strList.at(4);
+                     } else if (strList.at(0).startsWith("mapsbcol")) {
+                         mapsbcol1 = strList.at(1);
+                         mapsbcol2 = strList.at(2);
+                         mapsbcol3 = strList.at(3);
+                         mapsbcol4 = strList.at(4);
+                     } else if (strList.at(0).startsWith("mapnoise")) {
+                         mapnoise = strList.at(1);
+                     } else if (strList.at(0).startsWith("borderwidth")) {
+                         borderwidth = strList.at(1);
+                     }
                  } else {
                      if (strList.size() > 1) {
                          NationData data;
