@@ -13,13 +13,15 @@ NationDialog::~NationDialog()
     delete ui;
 }
 
-void NationDialog::setNationList(QList<Dom3AI::NationData> nationList) {
+void NationDialog::setNationList(QList<Dom3AI::NationData> nationList)
+{
     nations = nationList;
     setupList();
 }
 
 
-void NationDialog::setupList() {
+void NationDialog::setupList()
+{
     QListIterator<Dom3AI::NationData> i(nations);
     while (i.hasNext()) {
         QListWidgetItem * listWidgetItem = new QListWidgetItem(i.next().name, ui->nationList);
@@ -28,7 +30,8 @@ void NationDialog::setupList() {
     }
 }
 
-QList<Dom3AI::NationData> NationDialog::getSelectedNations() {
+QList<Dom3AI::NationData> NationDialog::getSelectedNations()
+{
     QList<Dom3AI::NationData> selectedNations;
     int count = ui->nationList->count();
     for(int index = 0; index < count; index++)

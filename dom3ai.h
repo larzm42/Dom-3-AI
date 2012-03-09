@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QProgressDialog>
+#include <QMultiMap>
 
 namespace Ui {
 class Dom3AI;
@@ -20,6 +21,12 @@ public:
     struct NationData {
         int number;
         QString name;
+    };
+
+    struct NationStrategy {
+        int number;
+        QStringList god;
+        QStringList dm;
     };
 
 protected:
@@ -45,10 +52,20 @@ private:
     QList<NationData> middleNations;
     QList<NationData> lateNations;
     QList<NationData> selectedNations;
+    QMultiMap<int, NationStrategy> nationStrategies;
 
     void readSettings();
     void writeSettings();
-    void loadTextFile(QString fileName);
+    void parseMap(QString fileName);
+    void readGods();
+    void generateGame();
+    QList<int> chooseNations();
+    QList<NationStrategy> chooseStrategies(QList<int> nations);
+    QList<int> chooseProvinces(int numNations);
+    QList<int> possibleProvinces(int minNeighbors);
+    void addStrategiesToMap(QList<NationStrategy> strategies, QList<int> provinces);
+    bool place(QList<int> *, QList<int> *, int);
+    bool tryToPlace(QList<int> *, QList<int> *);
 
     enum SetupSection {
         None,
