@@ -64,8 +64,13 @@ private:
     QList<int> chooseProvinces(int numNations);
     QList<int> possibleProvinces(int minNeighbors);
     void addStrategiesToMap(QList<NationStrategy> strategies, QList<int> provinces);
+    void addStrategiesToDm(QList<Dom3AI::NationStrategy> strategies);
+    void createDMFile();
+    void addAlliesToMap(QList<QList<int> >);
+    void addNoIndyToMap();
     bool place(QList<int> *, QList<int> *, int);
     bool tryToPlace(QList<int> *, QList<int> *);
+    char * expandRandom(QString command, QString file);
 
     enum SetupSection {
         None,

@@ -62,6 +62,7 @@ QString mapnoise = "100";
 QString borderwidth = "15";
 
 QString mapFileName;
+QString dmFileName;
 
 Graph G;
 random::mt19937 gen;
@@ -130,7 +131,6 @@ void Dom3AI::parseMap(QString fileName)
     while (!in.atEnd()) {
         line = in.readLine();
         if (line.startsWith("#neighbour")) {
-           // std::cout << line.toStdString() << std::endl;
             QStringList strList = line.split(" ");
             list.append(Edge(strList.at(1).toInt(), strList.at(2).toInt()));
             vertices.insert(strList.at(1).toInt());
@@ -155,8 +155,6 @@ void Dom3AI::parseMap(QString fileName)
 
     //const int number_of_vertices = num_vertices(G);
     const int num_edges = i;
-
-//    std::cout << "Edges: " << num_edges << std::endl << "Vertices: " << number_of_vertices << std::endl;
 
     // add the edges to the graph object
     for (int i = 0; i < num_edges; ++i) {
@@ -219,7 +217,8 @@ void Dom3AI::poll_map_file()
     QFileInfo mapFile = QFileInfo(exe.absolutePath() + "/maps/" + mapFileName + ".map");
     if (mapFile.exists()) {
         dialog.close();
-        mapFileName += ".map";
+        mapFileName = mapFile.absoluteFilePath();
+        dmFileName = exe.absolutePath() + "/mods/" + mapFileName + ".dm";
         generateGame();
     } else {
         dialog.setValue(counter++);
@@ -235,9 +234,9 @@ void Dom3AI::closeEvent(QCloseEvent * event)
 
 void Dom3AI::on_generateGameButton_clicked()
 {
+    random::uniform_int_distribution<> dist(10000, 99999);
+    int i = dist(gen);
     if (ui->randomMapRadio->isChecked() && ui->numProvinceText->text().size() > 0) {
-        random::uniform_int_distribution<> dist(10000, 99999);
-        int i = dist(gen);
         mapFileName = "randomMap" + QString::number(i);
         QStringList args;
         args << "--makemap" << mapFileName
@@ -274,6 +273,9 @@ void Dom3AI::on_generateGameButton_clicked()
         QTimer::singleShot(1000, this, SLOT(poll_map_file()));
     } else {
         mapFileName = ui->mapText->text();
+        QFileInfo mapFile = QFileInfo(mapFileName);
+        QFileInfo exe = QFileInfo(ui->dom3Text->text());
+        dmFileName = exe.absolutePath() + "/mods/" + mapFile.baseName() + QString::number(i)+ ".dm";
         generateGame();
     }
 }
@@ -283,9 +285,136 @@ void Dom3AI::generateGame()
     QList<int> nations = chooseNations();
     QList<NationStrategy> strategies = chooseStrategies(nations);
     QList<int> provinces = chooseProvinces(nations.size());
+    if (provinces.size() != nations.size()) {
+        std::cout << "Nation length and province length do not match";
+        return;
+    }
 
     addStrategiesToMap(strategies, provinces);
+
+    // Write allies to map
+    if (ui->alliesCombo->currentText() != "0 Teams") {
+        QList<QList<int> > teams;
+        if (ui->alliesCombo->currentText() == "1 Team") {
+            teams.append(nations);
+        } else if (ui->alliesCombo->currentText() == "2 Teams") {
+            QList<int> nationsList1 = nations;
+            QList<int> nationsList2;
+            int teamSize = nations.size()/2;
+            for (int i = 0; i < teamSize; i++) {
+                random::uniform_int_distribution<> dist(0, nationsList1.size()-1);
+                nationsList2.append(nationsList1.takeAt(dist(gen)));
+            }
+            teams.append(nationsList1);
+            teams.append(nationsList2);
+        } else if (ui->alliesCombo->currentText() == "3 Teams") {
+            QList<int> nationsList1 = nations;
+            QList<int> nationsList2;
+            QList<int> nationsList3;
+            int teamSize = nations.size()/3;
+            for (int i = 0; i < teamSize; i++) {
+                random::uniform_int_distribution<> dist(0, nationsList1.size()-1);
+                nationsList2.append(nationsList1.takeAt(dist(gen)));
+            }
+            for (int i = 0; i < teamSize; i++) {
+                random::uniform_int_distribution<> dist(0, nationsList1.size()-1);
+                nationsList3.append(nationsList1.takeAt(dist(gen)));
+            }
+            teams.append(nationsList1);
+            teams.append(nationsList2);
+            teams.append(nationsList3);
+        } else if (ui->alliesCombo->currentText() == "4 Teams") {
+            QList<int> nationsList1 = nations;
+            QList<int> nationsList2;
+            QList<int> nationsList3;
+            QList<int> nationsList4;
+            int teamSize = nations.size()/4;
+            for (int i = 0; i < teamSize; i++) {
+                random::uniform_int_distribution<> dist(0, nationsList1.size()-1);
+                nationsList2.append(nationsList1.takeAt(dist(gen)));
+            }
+            for (int i = 0; i < teamSize; i++) {
+                random::uniform_int_distribution<> dist(0, nationsList1.size()-1);
+                nationsList3.append(nationsList1.takeAt(dist(gen)));
+            }
+            for (int i = 0; i < teamSize; i++) {
+                random::uniform_int_distribution<> dist(0, nationsList1.size()-1);
+                nationsList4.append(nationsList1.takeAt(dist(gen)));
+            }
+            teams.append(nationsList1);
+            teams.append(nationsList2);
+            teams.append(nationsList3);
+            teams.append(nationsList4);
+        }
+        addAlliesToMap(teams);
+    }
+
+    // NI to map?
+    if (ui->noIndyRadio->isChecked()) {
+        addNoIndyToMap();
+    }
+
+    // BI?
+    if (ui->betterIndyRadio->isChecked()) {
+        createDMFile();
+        QFile dmFile(dmFileName);
+        dmFile.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text);
+        QTextStream out(&dmFile);
+
+        QFile biFile(":/mods/better_independents_v2-1.dm");
+        biFile.open(QIODevice::ReadOnly);
+
+        QTextStream in(&biFile);
+        QString line;
+
+        while (!in.atEnd()) {
+            line = in.readLine();
+            out << line << '\n';
+        }
+    }
+
+    // MR?
+    if (ui->mrCombo->currentIndex() != 0) {
+        createDMFile();
+        QFile dmFile(dmFileName);
+        dmFile.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text);
+        QTextStream out(&dmFile);
+
+        QFile mrFile(":/mods/Magicrestriction6.dm");
+        mrFile.open(QIODevice::ReadOnly);
+
+        QTextStream in(&mrFile);
+        QString line;
+
+        while (!in.atEnd()) {
+            line = in.readLine();
+            out << line << '\n';
+        }
+    }
+
+    // Add the strategies
+    addStrategiesToDm(strategies);
+
+    // Generate the game
 }
+
+void Dom3AI::createDMFile()
+{
+    QFile dmFile(dmFileName);
+    if (!dmFile.exists()) {
+        dmFile.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text);
+
+        QTextStream out(&dmFile);
+
+        out << "#modname \"Dominions AI Improvement Mod for " << mapFileName << "\"" << '\n';
+        out << "#description \"This is the Dominions 3 AI Improvement Mod. This mod tries to increase the intelligence of the AI in single player games." << '\n';
+        out << "#version 1.00" << '\n';
+        out << "#icon \"cbcomplete.tga\"" << '\n';
+        out << "#domversion 3.27" << '\n';
+    }
+    dmFile.close();
+}
+
 
 QList<int> Dom3AI::chooseNations()
 {
@@ -366,18 +495,38 @@ QList<int> Dom3AI::possibleProvinces(int minNeighbors)
 
 bool Dom3AI::tryToPlace(QList<int> * possibleProvinceList, QList<int> * chosenProvinces)
 {
-    for (int i = 0; i < possibleProvinceList->size(); i++) {
-        if (!chosenProvinces->contains(possibleProvinceList->at(i))) {
-            chosenProvinces->append(i);
-            return true;
+    // Randomly choose a province
+    random::uniform_int_distribution<> dist(0, possibleProvinceList->size()-1);
+    int choice = dist(gen);
+    int x = 0;
+    while (chosenProvinces->contains(possibleProvinceList->at(choice))) {
+        choice = dist(gen);
+        x++;
+        if (x > 100) return false;
+    }
+
+    // Make sure its not too close to a neighbor
+    const int number_of_vertices = num_vertices(G);
+    graph_traits<Graph>::vertices_size_type d[number_of_vertices];
+    std::fill_n(d, number_of_vertices, 0);
+
+    breadth_first_search(G, possibleProvinceList->at(choice), visitor(make_bfs_visitor(record_distances(d, on_tree_edge()))));
+    typedef graph_traits<Graph>::adjacency_iterator adj_iter;
+
+    std::pair <adj_iter, adj_iter> adjVerts = adjacent_vertices(possibleProvinceList->at(choice), G);
+
+    for (int i = 0; i < number_of_vertices; i++) {
+        if (d[i] < 4 && chosenProvinces->contains(i+1)) {
+            return false;
         }
     }
-    return false;
+    chosenProvinces->append(possibleProvinceList->at(choice));
+    return true;
 }
 
 bool Dom3AI::place(QList<int> * possibleProvinceList, QList<int> * chosenProvinces, int numNations)
 {
-    for (int i = 0; i < 1000; i++) {
+    for (int i = 0; i < 100; i++) {
         if (tryToPlace(possibleProvinceList, chosenProvinces)) {
             if (chosenProvinces->size() == numNations) {
                 return true;
@@ -401,47 +550,13 @@ QList<int> Dom3AI::chooseProvinces(int numNations)
         possibleProvinceList = possibleProvinces(minNeigbors);
     }
 
-//    random::uniform_int_distribution<> dist(0, possibleProvinceList.size()-1);
-//    QList<int> chosenProvinceIndex;
-//    for (int i = 0; i < numNations; i++) {
-//        int possibleProvince = dist(gen);
-//        while (chosenProvinceIndex.contains(possibleProvince)) {
-//            possibleProvince = dist(gen);
-//        }
-//        chosenProvinceIndex.append(possibleProvince);
-//        chosenProvinces.append(possibleProvinceList.at(possibleProvince));
-//    }
+    while (minNeigbors > 1 && !place(&possibleProvinceList, &chosenProvinces, numNations)) {
+        minNeigbors--;
+        possibleProvinceList = possibleProvinces(minNeigbors);
+        chosenProvinces.clear();
 
-    place(&possibleProvinceList, &chosenProvinces, numNations);
+    }
     return chosenProvinces;
-    // Array to store distances from the source to each vertex .  We use
-    // a built-in array here just for variety. This will also be used as
-    // a Decorator.
-//    graph_traits<Graph>::vertices_size_type d[number_of_vertices];
-//    std::fill_n(d, number_of_vertices, 0);
-
-//    if (searchString.toInt() < number_of_vertices) {
-//        breadth_first_search(G, searchString.toInt(), visitor(make_bfs_visitor(record_distances(d, on_tree_edge()))));
-//        print_graph(G);
-
-//        std::stringbuf StringBuffer;
-//        std::ostream os(&StringBuffer);
-//        os << "distances: ";
-//        std::copy(d, d + number_of_vertices, std::ostream_iterator<int>(os, " "));
-//        os << std::endl << "adjacent vertices: ";
-
-//        typedef graph_traits<Graph>::adjacency_iterator adj_iter;
-
-//        std::pair <adj_iter, adj_iter> adjVerts = adjacent_vertices(searchString.toInt(), G);
-
-//        for (; adjVerts.first != adjVerts.second; ++adjVerts.first) {
-//            os << *adjVerts.first << " ";
-//        }
-
-//        QString text;
-//        ui->textEdit->setText(text.fromStdString(StringBuffer.str()));
-//    }
-
 }
 
 void Dom3AI::addStrategiesToMap(QList<Dom3AI::NationStrategy> strategies, QList<int> provinces)
@@ -450,14 +565,115 @@ void Dom3AI::addStrategiesToMap(QList<Dom3AI::NationStrategy> strategies, QList<
     mapFile.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text);
 
     QTextStream out(&mapFile);
+    out << '\n' << '\n';
     for (int i = 0; i < strategies.size(); i++) {
+        out << "#setland " << provinces[i] << '\n';
+        out << "#specstart " << strategies[i].number << " " << provinces[i]<< '\n';
         QStringListIterator iter(strategies[i].god);
         while (iter.hasNext()) {
-            out << iter.next().toLocal8Bit().constData() << '\n';
+            QString line = iter.next();
+            if (line.startsWith("@")) {
+                if (line.startsWith("@RANDOM")) {
+                    QStringList list = line.split(" ");
+                    out << expandRandom(list.at(1), list.at(2)) << '\n';
+                } else {
+                    QStringList list = line.split(" ");
+                    QString numberStr = list.at(0);
+                    int number = numberStr.remove(0, 1).toInt();
+                    QString command = "";
+                    if (list.size() > 1 && list.at(1).size() > 0) {
+                        command = "#" + list.at(1);
+                    }
+                    QStringList choices;
+                    for (int i = 0; i < number; i++) {
+                        choices.append(iter.next());
+                    }
+                    random::uniform_int_distribution<> dist(0, choices.size()-1);
+                    int i = dist(gen);
+                    out << command << " " << choices.at(i) << '\n';
+                }
+            } else {
+                out << line.toLocal8Bit().constData() << '\n';
+            }
+        }
+    }
+    mapFile.close();
+}
+
+char * Dom3AI::expandRandom(QString command, QString file)
+{
+    QFile nameFile(QDir::current().absolutePath() + "/names/" + file + "_DATA1.txt");
+    if (nameFile.exists()) {
+        nameFile.open(QIODevice::ReadOnly);
+        QTextStream in(&nameFile);
+        QStringList nameLines;
+        while (!in.atEnd()) {
+            nameLines.append(in.readLine());
+        }
+        random::uniform_int_distribution<> dist(0, nameLines.size()-1);
+        int i = dist(gen);
+        QString returnStr = "#" + command + " \"" + nameLines.at(i) + "\"";
+        return returnStr.toLocal8Bit().data();
+    }
+    return "";
+}
+
+void Dom3AI::addAlliesToMap(QList<QList<int> > teams)
+{
+    QFile mapFile(mapFileName);
+    mapFile.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text);
+
+    QTextStream out(&mapFile);
+    out << '\n' << '\n';
+    for (int i = 0; i < teams.size(); i++) {
+        for (int j = 0; j < teams.at(i).size(); j++) {
+            for (int k = j+1; k < teams.at(i).size(); k++) {
+                out << "#allies " << teams.at(i).at(j) << " " << teams.at(i).at(k) << '\n';
+            }
         }
     }
     mapFile.close();
 
+}
+
+void Dom3AI::addNoIndyToMap()
+{
+    QFile mapFile(mapFileName);
+    mapFile.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text);
+
+    QTextStream out(&mapFile);
+    out << '\n' << '\n';
+
+    const int number_of_vertices = num_vertices(G);
+
+    for (int i = 1; i <= number_of_vertices; i++) {
+        out << "#setland " << i << '\n';
+        out << "#poptype 99" << '\n';
+    }
+    mapFile.close();
+
+}
+
+void Dom3AI::addStrategiesToDm(QList<Dom3AI::NationStrategy> strategies)
+{
+    for (int i = 0; i < strategies.size(); i++) {
+        if (strategies[i].dm.size() > 1) {
+            createDMFile();
+            break;
+        }
+
+    }
+    QFile dmFile(dmFileName);
+    dmFile.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text);
+
+    QTextStream out(&dmFile);
+    for (int i = 0; i < strategies.size(); i++) {
+        QStringListIterator iter(strategies[i].dm);
+        while (iter.hasNext()) {
+            out << iter.next().toLocal8Bit().constData() << '\n';
+        }
+    }
+    dmFile.close();
 }
 
 
@@ -573,7 +789,7 @@ void Dom3AI::writeSettings()
 
 void Dom3AI::readGods()
 {
-    QDir dir("C:/Users/lamoor/larzm42-Dom-3-AI/gods");
+    QDir dir(QDir::current().absolutePath() + "/gods");
     QStringList filters;
     filters << "*.god";
     QList<QFileInfo> info = dir.entryInfoList(filters);
