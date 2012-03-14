@@ -33,7 +33,6 @@ protected:
      void closeEvent(QCloseEvent *event);
 
 private slots:
-    void on_findButton_clicked();
     void on_mapBrowseButton_clicked();
     void on_chooseNationsButton_clicked();
     void on_existingMapRadio_clicked(bool checked);
@@ -43,6 +42,8 @@ private slots:
     void on_generateGameButton_clicked();
     void on_dom3BrowseButton_clicked();
     void poll_map_file();
+    void generateGame();
+    void on_eraCombo_currentIndexChanged(const QString &arg1);
 
 private:
     Ui::Dom3AI *ui;
@@ -58,7 +59,6 @@ private:
     void writeSettings();
     void parseMap(QString fileName);
     void readGods();
-    void generateGame();
     QList<int> chooseNations();
     QList<NationStrategy> chooseStrategies(QList<int> nations);
     QList<int> chooseProvinces(int numNations);
@@ -70,7 +70,8 @@ private:
     void addNoIndyToMap();
     bool place(QList<int> *, QList<int> *, int);
     bool tryToPlace(QList<int> *, QList<int> *);
-    char * expandRandom(QString command, QString file);
+    QString expandRandom(QString command, QString file);
+    bool isMapValid(QString fileName);
 
     enum SetupSection {
         None,
