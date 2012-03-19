@@ -74,6 +74,7 @@ Dom3AI::Dom3AI(QWidget *parent) :
 {
     gen.seed(static_cast<unsigned int>(std::time(0)));
     ui->setupUi(this);
+    ui->difficultyComboBox->setCurrentIndex(1);
     readSettings();
     QListIterator<Dom3AI::NationData> iter(earlyNations);
     while (iter.hasNext()) {
@@ -682,7 +683,8 @@ void Dom3AI::addStrategiesToMap(QList<Dom3AI::NationStrategy> strategies, QList<
     out << '\n' << '\n';
     for (int i = 0; i < strategies.size(); i++) {
         out << "#setland " << provinces[i] << '\n';
-        out << "#specstart " << strategies[i].number << " " << provinces[i]<< '\n';
+        out << "#specstart " << strategies[i].number << " " << provinces[i] << '\n';
+        out << "#computerplayer " << strategies[i].number << " " << QString::number(ui->difficultyComboBox->currentIndex()+1) << '\n';
         QStringListIterator iter(strategies[i].god);
         while (iter.hasNext()) {
             QString line = iter.next();
@@ -962,38 +964,3 @@ void Dom3AI::on_eraCombo_currentIndexChanged(const QString &arg1)
         ui->playerNationCombo->addItem(iter.next().name);
     }
 }
-
-//void Dom3AI::on_findButton_clicked()
-//{
-//    QString searchString = ui->lineEdit->text();
-
-//    const int number_of_vertices = num_vertices(G);
-
-//    // Array to store distances from the source to each vertex .  We use
-//    // a built-in array here just for variety. This will also be used as
-//    // a Decorator.
-//    graph_traits<Graph>::vertices_size_type d[number_of_vertices];
-//    std::fill_n(d, number_of_vertices, 0);
-
-//    if (searchString.toInt() < number_of_vertices) {
-//        breadth_first_search(G, searchString.toInt(), visitor(make_bfs_visitor(record_distances(d, on_tree_edge()))));
-//        print_graph(G);
-
-//        std::stringbuf StringBuffer;
-//        std::ostream os(&StringBuffer);
-//        os << "distances: ";
-//        std::copy(d, d + number_of_vertices, std::ostream_iterator<int>(os, " "));
-//        os << std::endl << "adjacent vertices: ";
-
-//        typedef graph_traits<Graph>::adjacency_iterator adj_iter;
-
-//        std::pair <adj_iter, adj_iter> adjVerts = adjacent_vertices(searchString.toInt(), G);
-
-//        for (; adjVerts.first != adjVerts.second; ++adjVerts.first) {
-//            os << *adjVerts.first << " ";
-//        }
-
-//        QString text;
-//        ui->textEdit->setText(text.fromStdString(StringBuffer.str()));
-//    }
-//}
