@@ -417,9 +417,11 @@ void Dom3AI::generateGame()
     QFileInfo mapInfo(mapFileName);
     QFileInfo dmInfo(dmFileName);
     QStringList args;
-    args << "--mapfile" << mapInfo.fileName()
-         << "--enablemod" << dmInfo.fileName()
-         << "--era" << QString::number(ui->eraCombo->currentIndex()+1)
+    args << "--mapfile" << mapInfo.fileName();
+    if (dmInfo.exists()) {
+        args << "--enablemod" << dmInfo.fileName();
+    }
+    args << "--era" << QString::number(ui->eraCombo->currentIndex()+1)
          << "-d";
 
     QString program = ui->dom3Text->text();
