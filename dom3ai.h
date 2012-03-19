@@ -18,9 +18,16 @@ public:
     explicit Dom3AI(QWidget *parent = 0);
     ~Dom3AI();
 
+    struct TerrainData {
+        int province;
+        uint terrainMask;
+    };
+
     struct NationData {
         int number;
         QString name;
+        inline bool operator==(const NationData &s) const
+        { return s.number == number; }
     };
 
     struct NationStrategy {
@@ -54,6 +61,7 @@ private:
     QList<NationData> lateNations;
     QList<NationData> selectedNations;
     QMultiMap<int, NationStrategy> nationStrategies;
+    QList<TerrainData> terrainList;
 
     void readSettings();
     void writeSettings();
@@ -64,12 +72,14 @@ private:
     QList<int> chooseProvinces(int numNations);
     QList<int> possibleProvinces(int minNeighbors);
     void addStrategiesToMap(QList<NationStrategy> strategies, QList<int> provinces);
+    void addAllowedPlayersToMap(QList<Dom3AI::NationStrategy> strategies);
+    void addPlayerStart(QList<int> provinces);
     void addStrategiesToDm(QList<Dom3AI::NationStrategy> strategies);
     void createDMFile();
-    void addAlliesToMap(QList<QList<int> >);
+    void addAlliesToMap(QList<QList<int> > teams);
     void addNoIndyToMap();
-    bool place(QList<int> *, QList<int> *, int);
-    bool tryToPlace(QList<int> *, QList<int> *);
+    bool place(QList<int> * possibleProvinceList, QList<int> * chosenProvinces, uint minDistance, int numNations);
+    bool tryToPlace(QList<int> * possibleProvinceList, QList<int> * chosenProvinces, uint minDistance);
     QString expandRandom(QString command, QString file);
     bool isMapValid(QString fileName);
 

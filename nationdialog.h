@@ -15,12 +15,12 @@ class NationDialog : public QDialog
 public:
     explicit NationDialog(QWidget *parent = 0);
     ~NationDialog();
-    void setNationList(QList<Dom3AI::NationData> nationList);
+    void setNationList(QList<Dom3AI::NationData> nationList, QList<Dom3AI::NationData> selectedNationList, QString playerNation);
     QList<Dom3AI::NationData> getSelectedNations();
 
 private:
     Ui::NationDialog *ui;
-    void setupList();
+    void setupList(QList<Dom3AI::NationData> selectedNationList, QString playerNation);
     QList<Dom3AI::NationData> nations;
 };
 

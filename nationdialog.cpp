@@ -13,20 +13,27 @@ NationDialog::~NationDialog()
     delete ui;
 }
 
-void NationDialog::setNationList(QList<Dom3AI::NationData> nationList)
+void NationDialog::setNationList(QList<Dom3AI::NationData> nationList, QList<Dom3AI::NationData> selectedNationList, QString playerNation)
 {
     nations = nationList;
-    setupList();
+    setupList(selectedNationList, playerNation);
 }
 
 
-void NationDialog::setupList()
+void NationDialog::setupList(QList<Dom3AI::NationData> selectedNationList, QString playerNation)
 {
     QListIterator<Dom3AI::NationData> i(nations);
     while (i.hasNext()) {
-        QListWidgetItem * listWidgetItem = new QListWidgetItem(i.next().name, ui->nationList);
-        listWidgetItem->setFlags( listWidgetItem->flags() | Qt::ItemIsUserCheckable);
-        listWidgetItem->setCheckState(Qt::Unchecked);
+        Dom3AI::NationData nationData = i.next();
+        if (playerNation != nationData.name) {
+            QListWidgetItem * listWidgetItem = new QListWidgetItem(nationData.name, ui->nationList);
+            listWidgetItem->setFlags( listWidgetItem->flags() | Qt::ItemIsUserCheckable);
+            if (selectedNationList.contains(nationData)) {
+                listWidgetItem->setCheckState(Qt::Checked);
+            } else {
+                listWidgetItem->setCheckState(Qt::Unchecked);
+            }
+        }
     }
 }
 

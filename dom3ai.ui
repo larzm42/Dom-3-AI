@@ -711,13 +711,6 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_11">
      <item>
-      <widget class="QPushButton" name="generateGameButton">
-       <property name="text">
-        <string>Generate Game</string>
-       </property>
-      </widget>
-     </item>
-     <item>
       <spacer name="horizontalSpacer_7">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
@@ -729,6 +722,13 @@
         </size>
        </property>
       </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="generateGameButton">
+       <property name="text">
+        <string>Generate Game</string>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>

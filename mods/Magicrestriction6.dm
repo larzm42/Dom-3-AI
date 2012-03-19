@@ -822,7 +822,7 @@
 #school -1
 #end
 
-#selectspell "Claws of Cocytus"
+#selectspell "Claws of Kokytos"
 #school -1
 #end
 
@@ -849,11 +849,11 @@
 #school -1
 #end
 
-#selectspell "Summon Mandaha"
+#selectspell "Summon Mandeha"
 #school -1
 #end
 
-#selectspell "Summon Davana"
+#selectspell "Summon Davanas"
 #school -1
 #end
 

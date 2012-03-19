@@ -87,41 +87,6 @@ Dom3AI::~Dom3AI()
     delete ui;
 }
 
-//void Dom3AI::on_findButton_clicked()
-//{
-//    QString searchString = ui->lineEdit->text();
-
-//    const int number_of_vertices = num_vertices(G);
-
-//    // Array to store distances from the source to each vertex .  We use
-//    // a built-in array here just for variety. This will also be used as
-//    // a Decorator.
-//    graph_traits<Graph>::vertices_size_type d[number_of_vertices];
-//    std::fill_n(d, number_of_vertices, 0);
-
-//    if (searchString.toInt() < number_of_vertices) {
-//        breadth_first_search(G, searchString.toInt(), visitor(make_bfs_visitor(record_distances(d, on_tree_edge()))));
-//        print_graph(G);
-
-//        std::stringbuf StringBuffer;
-//        std::ostream os(&StringBuffer);
-//        os << "distances: ";
-//        std::copy(d, d + number_of_vertices, std::ostream_iterator<int>(os, " "));
-//        os << std::endl << "adjacent vertices: ";
-
-//        typedef graph_traits<Graph>::adjacency_iterator adj_iter;
-
-//        std::pair <adj_iter, adj_iter> adjVerts = adjacent_vertices(searchString.toInt(), G);
-
-//        for (; adjVerts.first != adjVerts.second; ++adjVerts.first) {
-//            os << *adjVerts.first << " ";
-//        }
-
-//        QString text;
-//        ui->textEdit->setText(text.fromStdString(StringBuffer.str()));
-//    }
-//}
-
 bool Dom3AI::isMapValid(QString fileName)
 {
     bool valid = false;
@@ -152,8 +117,7 @@ void Dom3AI::parseMap(QString fileName)
     QString line;
     QList<Edge> list;
     QSet<int> vertices;
-    int i = 0;
-    std::cout << "parseMap" << std::endl;
+    int numEdges = 0;
     while (!in.atEnd()) {
         line = in.readLine();
         std::cout << line.toStdString() << std::endl;
@@ -162,12 +126,18 @@ void Dom3AI::parseMap(QString fileName)
             list.append(Edge(strList.at(1).toInt(), strList.at(2).toInt()));
             vertices.insert(strList.at(1).toInt());
             vertices.insert(strList.at(2).toInt());
-            i++;
+            numEdges++;
+        } else if (line.startsWith("#terrain")) {
+            QStringList strList = line.split(" ");
+            TerrainData data;
+            data.province = strList.at(1).toInt();
+            data.terrainMask = strList.at(2).toUInt();
+            terrainList.append(data);
         }
     }
 
     Edge * edge_array;
-    edge_array = new Edge[i];
+    edge_array = new Edge[numEdges];
     int j = 0;
     QListIterator<Edge> iter(list);
     while (iter.hasNext()) {
@@ -180,14 +150,10 @@ void Dom3AI::parseMap(QString fileName)
     // declare a graph object
     G = Graph(vertices.size());
 
-    //const int number_of_vertices = num_vertices(G);
-    const int num_edges = i;
-
     // add the edges to the graph object
-    for (int i = 0; i < num_edges; ++i) {
+    for (int i = 0; i < numEdges; ++i) {
       add_edge(edge_array[i].first-1, edge_array[i].second-1, G);
     }
-
 }
 
 void Dom3AI::on_mapBrowseButton_clicked()
@@ -201,11 +167,11 @@ void Dom3AI::on_chooseNationsButton_clicked()
 {
     NationDialog dialog;
     if (ui->eraCombo->currentText() == "Early") {
-        dialog.setNationList(earlyNations);
+        dialog.setNationList(earlyNations, selectedNations, ui->playerNationCombo->currentText());
     } else if (ui->eraCombo->currentText() == "Middle") {
-        dialog.setNationList(middleNations);
+        dialog.setNationList(middleNations, selectedNations, ui->playerNationCombo->currentText());
     } else if (ui->eraCombo->currentText() == "Late") {
-        dialog.setNationList(lateNations);
+        dialog.setNationList(lateNations, selectedNations, ui->playerNationCombo->currentText());
     }
     dialog.exec();
     selectedNations = dialog.getSelectedNations();
@@ -246,7 +212,7 @@ void Dom3AI::poll_map_file()
         dialog.close();
         mapFileName = mapFile.absoluteFilePath();
         parseMap(mapFileName);
-        dmFileName = exe.absolutePath() + "/mods/" + mapFileName + ".dm";
+        dmFileName = exe.absolutePath() + "/mods/" + mapFile.baseName() + ".dm";
         QTimer::singleShot(1000, this, SLOT(generateGame()));
     } else {
         dialog.setValue(counter++);
@@ -262,10 +228,10 @@ void Dom3AI::closeEvent(QCloseEvent * event)
 
 void Dom3AI::on_generateGameButton_clicked()
 {
-    random::uniform_int_distribution<> dist(10000, 99999);
+    random::uniform_int_distribution<> dist(1000, 9999);
     int i = dist(gen);
     if (ui->randomMapRadio->isChecked() && ui->numProvinceText->text().size() > 0) {
-        mapFileName = "randomMap" + QString::number(i);
+        mapFileName = "dom3AI_" + QString::number(i);
         QStringList args;
         args << "--makemap" << mapFileName
              << "--riverpart" << riverpart
@@ -300,10 +266,17 @@ void Dom3AI::on_generateGameButton_clicked()
         counter = 0;
         QTimer::singleShot(1000, this, SLOT(poll_map_file()));
     } else {
-        mapFileName = ui->mapText->text();
-        QFileInfo mapFile = QFileInfo(mapFileName);
+        // Copy the map file to the new map file
+        QFile oldMap(ui->mapText->text());
+        QFileInfo oldMapInfo(ui->mapText->text());
+        QString newFileName = oldMapInfo.baseName() + "_dom3AI_" + QString::number(i) + ".map";
+
         QFileInfo exe = QFileInfo(ui->dom3Text->text());
-        dmFileName = exe.absolutePath() + "/mods/" + mapFile.baseName() + QString::number(i)+ ".dm";
+
+        mapFileName = exe.absolutePath() + "/maps/" + newFileName;
+        oldMap.copy(mapFileName);
+        QFileInfo mapFile = QFileInfo(mapFileName);
+        dmFileName = exe.absolutePath() + "/mods/" + mapFile.baseName() + ".dm";
         generateGame();
     }
 }
@@ -312,12 +285,19 @@ void Dom3AI::generateGame()
 {
     QList<int> nations = chooseNations();
     QList<NationStrategy> strategies = chooseStrategies(nations);
-    QList<int> provinces = chooseProvinces(nations.size());
-    if (provinces.size() != nations.size()) {
+    QList<int> provinces = chooseProvinces(nations.size()+1);
+    if (provinces.size() != nations.size()+1) {
         std::cout << "Nation length and province length do not match" << std::endl;
         return;
     }
 
+    // Add allowed players
+    addAllowedPlayersToMap(strategies);
+
+    // Add start for player
+    addPlayerStart(provinces);
+
+    // Add stratagies for AIs
     addStrategiesToMap(strategies, provinces);
 
     // Write allies to map
@@ -408,7 +388,16 @@ void Dom3AI::generateGame()
         dmFile.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text);
         QTextStream out(&dmFile);
 
-        QFile mrFile(":/mods/Magicrestriction6.dm");
+        QString mrModName;
+        if (ui->mrCombo->currentIndex() == 1) {
+            mrModName = ":/mods/Magicrestriction8.dm";
+        } else if (ui->mrCombo->currentIndex() == 2) {
+            mrModName = ":/mods/Magicrestriction7.dm";
+        } else {
+            mrModName = ":/mods/Magicrestriction6.dm";
+        }
+
+        QFile mrFile(mrModName);
         mrFile.open(QIODevice::ReadOnly);
 
         QTextStream in(&mrFile);
@@ -424,6 +413,20 @@ void Dom3AI::generateGame()
     addStrategiesToDm(strategies);
 
     // Generate the game
+    QFileInfo mapInfo(mapFileName);
+    QFileInfo dmInfo(dmFileName);
+    QStringList args;
+    args << "--mapfile" << mapInfo.fileName()
+         << "--enablemod" << dmInfo.fileName()
+         << "--era" << QString::number(ui->eraCombo->currentIndex()+1)
+         << "-d";
+
+    QString program = ui->dom3Text->text();
+
+    QProcess *myProcess = new QProcess();
+    QFileInfo exe = QFileInfo(program);
+    myProcess->setWorkingDirectory(exe.absolutePath());
+    myProcess->start(program, args);
 }
 
 void Dom3AI::createDMFile()
@@ -434,13 +437,20 @@ void Dom3AI::createDMFile()
 
         QTextStream out(&dmFile);
 
-        out << "#modname \"Dominions AI Improvement Mod for " << mapFileName << "\"" << '\n';
-        out << "#description \"This is the Dominions 3 AI Improvement Mod. This mod tries to increase the intelligence of the AI in single player games." << '\n';
+        QFileInfo mapFileInfo(mapFileName);
+
+        out << "#modname \"AI Improvement Mod for " << mapFileInfo.baseName() << "\"" << '\n';
+        out << "#description \"This is the Dominions 3 AI Improvement Mod. This mod tries to increase the intelligence of the AI in single player games.\"" << '\n';
         out << "#version 1.00" << '\n';
-        out << "#icon \"cbcomplete.tga\"" << '\n';
+        out << "#icon \"dom3ai.tga\"" << '\n';
         out << "#domversion 3.27" << '\n';
     }
     dmFile.close();
+
+    QFile tgaFile(":/dom3ai.tga");
+    QFileInfo exe = QFileInfo(ui->dom3Text->text());
+    tgaFile.copy(exe.absolutePath() + "/mods/dom3ai.tga");
+
 }
 
 
@@ -454,7 +464,7 @@ QList<int> Dom3AI::chooseNations()
             random::uniform_int_distribution<> dist(0, earlyNations.size()-1);
             for (int i = 0; i < ui->numRandomNationsCombo->currentText().toInt(); i++) {
                 int possibleNation = dist(gen);
-                while (chosenNationIndex.contains(possibleNation)) {
+                while (chosenNationIndex.contains(possibleNation) || earlyNations.at(possibleNation).name == ui->playerNationCombo->currentText()) {
                     possibleNation = dist(gen);
                 }
                 chosenNationIndex.append(possibleNation);
@@ -464,7 +474,7 @@ QList<int> Dom3AI::chooseNations()
             random::uniform_int_distribution<> dist(0, middleNations.size()-1);
             for (int i = 0; i < ui->numRandomNationsCombo->currentText().toInt(); i++) {
                 int possibleNation = dist(gen);
-                while (chosenNationIndex.contains(possibleNation)) {
+                while (chosenNationIndex.contains(possibleNation) || middleNations.at(possibleNation).name == ui->playerNationCombo->currentText()) {
                     possibleNation = dist(gen);
                 }
                 chosenNationIndex.append(possibleNation);
@@ -474,7 +484,7 @@ QList<int> Dom3AI::chooseNations()
             random::uniform_int_distribution<> dist(0, lateNations.size()-1);
             for (int i = 0; i < ui->numRandomNationsCombo->currentText().toInt(); i++) {
                 int possibleNation = dist(gen);
-                while (chosenNationIndex.contains(possibleNation)) {
+                while (chosenNationIndex.contains(possibleNation) || lateNations.at(possibleNation).name == ui->playerNationCombo->currentText()) {
                     possibleNation = dist(gen);
                 }
                 chosenNationIndex.append(possibleNation);
@@ -515,13 +525,31 @@ QList<int> Dom3AI::possibleProvinces(int minNeighbors)
             count++;
         }
         if (count >= minNeighbors) {
-            possibleProvinces.append(i);
+            bool goodProvince = true;
+            // Make sure it's a startable province
+            QListIterator<Dom3AI::TerrainData> iter(terrainList);
+            while (iter.hasNext()) {
+                Dom3AI::TerrainData terrainData = iter.next();
+                if (terrainData.province == i+1) {
+                    if (terrainData.terrainMask & 4 ||
+                        terrainData.terrainMask & 8 ||
+                        terrainData.terrainMask & 64 ||
+                        terrainData.terrainMask & 512 ||
+                        terrainData.terrainMask & 2048) {
+                        goodProvince = false;
+                    }
+                }
+            }
+
+            if (goodProvince) {
+                possibleProvinces.append(i+1);
+            }
         }
     }
     return possibleProvinces;
 }
 
-bool Dom3AI::tryToPlace(QList<int> * possibleProvinceList, QList<int> * chosenProvinces)
+bool Dom3AI::tryToPlace(QList<int> * possibleProvinceList, QList<int> * chosenProvinces, uint minDistance)
 {
     // Randomly choose a province
     random::uniform_int_distribution<> dist(0, possibleProvinceList->size()-1);
@@ -538,13 +566,10 @@ bool Dom3AI::tryToPlace(QList<int> * possibleProvinceList, QList<int> * chosenPr
     graph_traits<Graph>::vertices_size_type d[number_of_vertices];
     std::fill_n(d, number_of_vertices, 0);
 
-    breadth_first_search(G, possibleProvinceList->at(choice), visitor(make_bfs_visitor(record_distances(d, on_tree_edge()))));
-    typedef graph_traits<Graph>::adjacency_iterator adj_iter;
-
-    std::pair <adj_iter, adj_iter> adjVerts = adjacent_vertices(possibleProvinceList->at(choice), G);
+    breadth_first_search(G, possibleProvinceList->at(choice)-1, visitor(make_bfs_visitor(record_distances(d, on_tree_edge()))));
 
     for (int i = 0; i < number_of_vertices; i++) {
-        if (d[i] < 4 && chosenProvinces->contains(i+1)) {
+        if (d[i] < minDistance && chosenProvinces->contains(i+1)) {
             return false;
         }
     }
@@ -552,14 +577,14 @@ bool Dom3AI::tryToPlace(QList<int> * possibleProvinceList, QList<int> * chosenPr
     return true;
 }
 
-bool Dom3AI::place(QList<int> * possibleProvinceList, QList<int> * chosenProvinces, int numNations)
+bool Dom3AI::place(QList<int> * possibleProvinceList, QList<int> * chosenProvinces, uint minDistance, int numNations)
 {
     for (int i = 0; i < 100; i++) {
-        if (tryToPlace(possibleProvinceList, chosenProvinces)) {
+        if (tryToPlace(possibleProvinceList, chosenProvinces, minDistance)) {
             if (chosenProvinces->size() == numNations) {
                 return true;
             } else {
-                if (place(possibleProvinceList, chosenProvinces, numNations)) {
+                if (place(possibleProvinceList, chosenProvinces, minDistance, numNations)) {
                     return true;
                 }
             }
@@ -570,25 +595,82 @@ bool Dom3AI::place(QList<int> * possibleProvinceList, QList<int> * chosenProvinc
 
 QList<int> Dom3AI::chooseProvinces(int numNations)
 {
-    std::cout << "chooseProvinces" << std::endl;
     QList<int> chosenProvinces;
     int minNeigbors = 6;
+    uint minDistance = 10;
     QList<int> possibleProvinceList = possibleProvinces(minNeigbors);
-    std::cout << "minNeigbors=" << minNeigbors << " possibleProvinces=" << possibleProvinceList.size() << std::endl;
+    std::cout << "minNeigbors=" << minNeigbors << " possibleProvinces=" << possibleProvinceList.size() << " minDistance=" << minDistance << std::endl;
     while (possibleProvinceList.size() < numNations && minNeigbors > 1) {
         minNeigbors--;
         possibleProvinceList = possibleProvinces(minNeigbors);
-        std::cout << "minNeigbors=" << minNeigbors << " possibleProvinces=" << possibleProvinceList.size() << std::endl;
+        std::cout << "minNeigbors=" << minNeigbors << " possibleProvinces=" << possibleProvinceList.size() << " minDistance=" << minDistance << std::endl;
     }
 
-    while (minNeigbors > 1 && !place(&possibleProvinceList, &chosenProvinces, numNations)) {
-        std::cout << "minNeigbors=" << minNeigbors << " possibleProvinces=" << possibleProvinceList.size() << std::endl;
-        minNeigbors--;
+    while (minNeigbors > 1 && !place(&possibleProvinceList, &chosenProvinces, minDistance, numNations)) {
+        if (minNeigbors > 4) {
+            minNeigbors--;
+        } else {
+            if (minDistance > 3) {
+                minDistance--;
+            } else {
+                if (minNeigbors > 2) {
+                    minNeigbors--;
+                } else {
+                    if (minDistance > 1) {
+                        minDistance--;
+                    } else {
+                        minNeigbors--;
+                    }
+                }
+            }
+        }
         possibleProvinceList = possibleProvinces(minNeigbors);
+        std::cout << "minNeigbors=" << minNeigbors << " possibleProvinces=" << possibleProvinceList.size() << " minDistance=" << minDistance << std::endl;
         chosenProvinces.clear();
-
     }
     return chosenProvinces;
+}
+
+void Dom3AI::addPlayerStart(QList<int> provinces)
+{
+    QFile mapFile(mapFileName);
+    mapFile.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text);
+
+    QTextStream out(&mapFile);
+    out << "#start " << provinces.last() << '\n';
+    mapFile.close();
+}
+
+void Dom3AI::addAllowedPlayersToMap(QList<Dom3AI::NationStrategy> strategies)
+{
+    QFile mapFile(mapFileName);
+    mapFile.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text);
+
+    QTextStream out(&mapFile);
+    out << '\n' << '\n';
+    for (int i = 0; i < strategies.size(); i++) {
+        out << "#allowedplayer " << strategies[i].number << '\n';
+    }
+    if (ui->eraCombo->currentText() == "Early") {
+        for (int i = 0; i < earlyNations.size(); i++) {
+            if (earlyNations.at(i).name == ui->playerNationCombo->currentText()) {
+                out << "#allowedplayer " << earlyNations.at(i).number << '\n';
+            }
+        }
+    } else if (ui->eraCombo->currentText() == "Middle") {
+        for (int i = 0; i < middleNations.size(); i++) {
+            if (middleNations.at(i).name == ui->playerNationCombo->currentText()) {
+                out << "#allowedplayer " << middleNations.at(i).number << '\n';
+            }
+        }
+    } else if (ui->eraCombo->currentText() == "Late") {
+        for (int i = 0; i < lateNations.size(); i++) {
+            if (lateNations.at(i).name == ui->playerNationCombo->currentText()) {
+                out << "#allowedplayer " << lateNations.at(i).number << '\n';
+            }
+        }
+    }
+    mapFile.close();
 }
 
 void Dom3AI::addStrategiesToMap(QList<Dom3AI::NationStrategy> strategies, QList<int> provinces)
@@ -624,6 +706,8 @@ void Dom3AI::addStrategiesToMap(QList<Dom3AI::NationStrategy> strategies, QList<
                     int i = dist(gen);
                     out << command << " " << choices.at(i) << '\n';
                 }
+            } else if (line.startsWith("#allies")) {
+                // Skip allies in GOD files
             } else {
                 out << line.toLocal8Bit().constData() << '\n';
             }
@@ -878,3 +962,38 @@ void Dom3AI::on_eraCombo_currentIndexChanged(const QString &arg1)
         ui->playerNationCombo->addItem(iter.next().name);
     }
 }
+
+//void Dom3AI::on_findButton_clicked()
+//{
+//    QString searchString = ui->lineEdit->text();
+
+//    const int number_of_vertices = num_vertices(G);
+
+//    // Array to store distances from the source to each vertex .  We use
+//    // a built-in array here just for variety. This will also be used as
+//    // a Decorator.
+//    graph_traits<Graph>::vertices_size_type d[number_of_vertices];
+//    std::fill_n(d, number_of_vertices, 0);
+
+//    if (searchString.toInt() < number_of_vertices) {
+//        breadth_first_search(G, searchString.toInt(), visitor(make_bfs_visitor(record_distances(d, on_tree_edge()))));
+//        print_graph(G);
+
+//        std::stringbuf StringBuffer;
+//        std::ostream os(&StringBuffer);
+//        os << "distances: ";
+//        std::copy(d, d + number_of_vertices, std::ostream_iterator<int>(os, " "));
+//        os << std::endl << "adjacent vertices: ";
+
+//        typedef graph_traits<Graph>::adjacency_iterator adj_iter;
+
+//        std::pair <adj_iter, adj_iter> adjVerts = adjacent_vertices(searchString.toInt(), G);
+
+//        for (; adjVerts.first != adjVerts.second; ++adjVerts.first) {
+//            os << *adjVerts.first << " ";
+//        }
+
+//        QString text;
+//        ui->textEdit->setText(text.fromStdString(StringBuffer.str()));
+//    }
+//}
