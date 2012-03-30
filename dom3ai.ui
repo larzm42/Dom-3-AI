@@ -163,6 +163,9 @@
             <bold>false</bold>
            </font>
           </property>
+          <property name="maxLength">
+           <number>4</number>
+          </property>
           <property name="readOnly">
            <bool>false</bool>
           </property>

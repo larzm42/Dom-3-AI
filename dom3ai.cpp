@@ -67,7 +67,6 @@ QString dmFileName;
 Graph G;
 random::mt19937 gen;
 
-
 Dom3AI::Dom3AI(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::Dom3AI)
@@ -101,7 +100,6 @@ bool Dom3AI::isMapValid(QString fileName)
         line = in.readLine();
         std::cout << line.toStdString() << std::endl;
         if (line.startsWith("#neighbour")) {
-            //inputFile.close();
             valid = true;
         }
     }
@@ -216,8 +214,14 @@ void Dom3AI::poll_map_file()
         dmFileName = exe.absolutePath() + "/mods/" + mapFile.baseName() + ".dm";
         QTimer::singleShot(1000, this, SLOT(generateGame()));
     } else {
-        dialog.setValue(counter++);
-        QTimer::singleShot(1000, this, SLOT(poll_map_file()));
+        if (!dialog.wasCanceled()) {
+            counter += 2;
+            if (counter > 99) {
+                counter = 0;
+            }
+            dialog.setValue(counter);
+            QTimer::singleShot(1000, this, SLOT(poll_map_file()));
+        }
     }
 }
 
@@ -258,27 +262,34 @@ void Dom3AI::on_generateGameButton_clicked()
 
         QProcess *myProcess = new QProcess();
         QFileInfo exe = QFileInfo(program);
-        myProcess->setWorkingDirectory(exe.absolutePath());
-        myProcess->start(program, args);
+        if (exe.isExecutable()) {
+            myProcess->setWorkingDirectory(exe.absolutePath());
+            myProcess->start(program, args);
 
-        dialog.setModal(true);
-        dialog.show();
+            dialog.reset();
+            dialog.setModal(true);
+            dialog.show();
 
-        counter = 0;
-        QTimer::singleShot(1000, this, SLOT(poll_map_file()));
+            counter = 0;
+            QTimer::singleShot(1000, this, SLOT(poll_map_file()));
+
+        }
+
     } else {
         // Copy the map file to the new map file
         QFile oldMap(ui->mapText->text());
-        QFileInfo oldMapInfo(ui->mapText->text());
-        QString newFileName = oldMapInfo.baseName() + "_dom3AI_" + QString::number(i) + ".map";
+        if (oldMap.exists()) {
+            QFileInfo oldMapInfo(ui->mapText->text());
+            QString newFileName = oldMapInfo.baseName() + "_dom3AI_" + QString::number(i) + ".map";
 
-        QFileInfo exe = QFileInfo(ui->dom3Text->text());
+            QFileInfo exe = QFileInfo(ui->dom3Text->text());
 
-        mapFileName = exe.absolutePath() + "/maps/" + newFileName;
-        oldMap.copy(mapFileName);
-        QFileInfo mapFile = QFileInfo(mapFileName);
-        dmFileName = exe.absolutePath() + "/mods/" + mapFile.baseName() + ".dm";
-        generateGame();
+            mapFileName = exe.absolutePath() + "/maps/" + newFileName;
+            oldMap.copy(mapFileName);
+            QFileInfo mapFile = QFileInfo(mapFileName);
+            dmFileName = exe.absolutePath() + "/mods/" + mapFile.baseName() + ".dm";
+            generateGame();
+        }
     }
 }
 
@@ -452,7 +463,10 @@ void Dom3AI::createDMFile()
 
     QFile tgaFile(":/dom3ai.tga");
     QFileInfo exe = QFileInfo(ui->dom3Text->text());
-    tgaFile.copy(exe.absolutePath() + "/mods/dom3ai.tga");
+    QFile tgaInMod (exe.absolutePath() + "/mods/dom3ai.tga");
+    if (!tgaInMod.exists()) {
+        tgaFile.copy(exe.absolutePath() + "/mods/dom3ai.tga");
+    }
 
 }
 
@@ -507,8 +521,15 @@ QList<Dom3AI::NationStrategy> Dom3AI::chooseStrategies(QList<int> nations)
     QList<Dom3AI::NationStrategy> chosenStrategies;
     for (int i = 0; i < nations.size(); i++) {
         QList<Dom3AI::NationStrategy> stratList = nationStrategies.values(nations[i]);
-        random::uniform_int_distribution<> dist(0, stratList.size()-1);
-        chosenStrategies.append(stratList.at(dist(gen)));
+        if (stratList.size() == 0) {
+            std::cout << "Nation " << nations[i] << " has no strategies!" << std::endl;
+            NationStrategy strategy;
+            strategy.number = nations[i];
+            chosenStrategies.append(strategy);
+        } else {
+            random::uniform_int_distribution<> dist(0, stratList.size()-1);
+            chosenStrategies.append(stratList.at(dist(gen)));
+        }
     }
     return chosenStrategies;
 }
@@ -582,7 +603,7 @@ bool Dom3AI::tryToPlace(QList<int> * possibleProvinceList, QList<int> * chosenPr
 
 bool Dom3AI::place(QList<int> * possibleProvinceList, QList<int> * chosenProvinces, uint minDistance, int numNations)
 {
-    for (int i = 0; i < 100; i++) {
+    for (int i = 0; i < 500; i++) {
         if (tryToPlace(possibleProvinceList, chosenProvinces, minDistance)) {
             if (chosenProvinces->size() == numNations) {
                 return true;
