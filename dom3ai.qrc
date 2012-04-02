@@ -4,5 +4,8 @@
         <file>mods/better_independents_v2-1.dm</file>
         <file>mods/Magicrestriction6.dm</file>
         <file>dom3ai.tga</file>
+        <file>mods/Magicrestriction7.dm</file>
+        <file>mods/Magicrestriction8.dm</file>
+        <file>eater.png</file>
     </qresource>
 </RCC>

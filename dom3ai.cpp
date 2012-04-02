@@ -22,6 +22,7 @@
 #include <QFileInfo>
 #include <QSettings>
 #include <QCloseEvent>
+#include <QtGui>
 #include "nationdialog.h"
 #include "dom3ai.h"
 #include "ui_dom3ai.h"
@@ -95,10 +96,8 @@ bool Dom3AI::isMapValid(QString fileName)
 
     QTextStream in(&inputFile);
     QString line;
-    std::cout << "isMapValid" << std::endl;
     while (!in.atEnd()) {
         line = in.readLine();
-        std::cout << line.toStdString() << std::endl;
         if (line.startsWith("#neighbour")) {
             valid = true;
         }
@@ -119,7 +118,6 @@ void Dom3AI::parseMap(QString fileName)
     int numEdges = 0;
     while (!in.atEnd()) {
         line = in.readLine();
-        std::cout << line.toStdString() << std::endl;
         if (line.startsWith("#neighbour")) {
             QStringList strList = line.split(" ");
             list.append(Edge(strList.at(1).toInt(), strList.at(2).toInt()));
@@ -179,14 +177,14 @@ void Dom3AI::on_chooseNationsButton_clicked()
 
 void Dom3AI::on_existingMapRadio_clicked(bool checked)
 {
-    ui->numProvinceText->setEnabled(!checked);
+    ui->numProvincesBox->setEnabled(!checked);
     ui->mapText->setEnabled(checked);
     ui->mapBrowseButton->setEnabled(checked);
 }
 
 void Dom3AI::on_randomMapRadio_clicked(bool checked)
 {
-    ui->numProvinceText->setEnabled(checked);
+    ui->numProvincesBox->setEnabled(checked);
     ui->mapText->setEnabled(!checked);
     ui->mapBrowseButton->setEnabled(!checked);
 }
@@ -235,7 +233,7 @@ void Dom3AI::on_generateGameButton_clicked()
 {
     random::uniform_int_distribution<> dist(1000, 9999);
     int i = dist(gen);
-    if (ui->randomMapRadio->isChecked() && ui->numProvinceText->text().size() > 0) {
+    if (ui->randomMapRadio->isChecked()) {
         mapFileName = "dom3AI_" + QString::number(i);
         QStringList args;
         args << "--makemap" << mapFileName
@@ -248,7 +246,7 @@ void Dom3AI::on_generateGameButton_clicked()
              << "--swamppart" << swamppart
              << "--mapaa"
              << "--mapsize" << mapsize1 << mapsize2
-             << "--mapprov" << ui->numProvinceText->text()
+             << "--mapprov" << ui->numProvincesBox->text()
              << "--mapgcol" << mapgcol1 << mapgcol2 << mapgcol3 << mapgcol4
              << "--mapscol" << mapscol1 << mapscol2 << mapscol3 << mapscol4
              << "--mapbcol" << mapbcol1 << mapbcol2 << mapbcol3 << mapbcol4
@@ -262,7 +260,7 @@ void Dom3AI::on_generateGameButton_clicked()
 
         QProcess *myProcess = new QProcess();
         QFileInfo exe = QFileInfo(program);
-        if (exe.isExecutable()) {
+        if (exe.exists() && exe.isExecutable()) {
             myProcess->setWorkingDirectory(exe.absolutePath());
             myProcess->start(program, args);
 
@@ -272,7 +270,11 @@ void Dom3AI::on_generateGameButton_clicked()
 
             counter = 0;
             QTimer::singleShot(1000, this, SLOT(poll_map_file()));
-
+        } else {
+            QMessageBox msgBox(QMessageBox::Warning, tr("Warning"),
+                               "Dominions 3 executable can't be run.", 0, this);
+            msgBox.addButton(tr("&Continue"), QMessageBox::RejectRole);
+            msgBox.exec();
         }
 
     } else {
@@ -289,6 +291,11 @@ void Dom3AI::on_generateGameButton_clicked()
             QFileInfo mapFile = QFileInfo(mapFileName);
             dmFileName = exe.absolutePath() + "/mods/" + mapFile.baseName() + ".dm";
             generateGame();
+        } else {
+            QMessageBox msgBox(QMessageBox::Warning, tr("Warning"),
+                               "Map file doesn't exist.", 0, this);
+            msgBox.addButton(tr("&Continue"), QMessageBox::RejectRole);
+            msgBox.exec();
         }
     }
 }
@@ -299,7 +306,10 @@ void Dom3AI::generateGame()
     QList<NationStrategy> strategies = chooseStrategies(nations);
     QList<int> provinces = chooseProvinces(nations.size()+1);
     if (provinces.size() != nations.size()+1) {
-        std::cout << "Nation length and province length do not match" << std::endl;
+        QMessageBox msgBox(QMessageBox::Warning, tr("Warning"),
+                           "Couldn't fit all of the nations on the map.", 0, this);
+        msgBox.addButton(tr("&Continue"), QMessageBox::RejectRole);
+        msgBox.exec();
         return;
     }
 
