@@ -1,5 +1,5 @@
 #god 40 812 -- Lord of the Wild
-#comname "Natural Disaster"
+@RANDOM comname COMMANDER
 #allies 40 48 -- likes to ally with Oceania if they are both AI
 #clearmagic
 #mag_death 4 -- needed for Pangea spells and a bless

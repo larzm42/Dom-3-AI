@@ -280,7 +280,13 @@ void Dom3AI::on_generateGameButton_clicked()
             myProcess->start(program, args);
 
             dialog.reset();
+            Qt::WindowFlags flags = dialog.windowFlags();
+            Qt::WindowFlags helpFlag = Qt::WindowContextHelpButtonHint;
+            flags = flags & (~helpFlag);
+            dialog.setWindowFlags(flags);
             dialog.setModal(true);
+            dialog.setWindowTitle("Generating Map");
+            dialog.setWindowIcon(QIcon(":/eater.png"));
             dialog.show();
 
             counter = 0;
@@ -449,6 +455,13 @@ void Dom3AI::generateGame()
     // Add the strategies
     addStrategiesToDm(strategies);
 
+    // Tell the user what to do
+    QMessageBox msgBox(QMessageBox::Information, tr("Instructions"),
+                       "Dominions 3 will now be launched. To start the game select \"Create a New Game\". Hit \"Add New Player\" until no more can be added (no need to select nations). Then select the nation you chose to play. Start the game and you're ready to go!", 0, this);
+    msgBox.addButton(tr("&Continue"), QMessageBox::RejectRole);
+    msgBox.exec();
+
+
     // Generate the game
     QFileInfo mapInfo(mapFileName);
     QFileInfo dmInfo(dmFileName);
@@ -492,7 +505,6 @@ void Dom3AI::createDMFile()
     if (!tgaInMod.exists()) {
         tgaFile.copy(exe.absolutePath() + "/mods/dom3ai.tga");
     }
-
 }
 
 

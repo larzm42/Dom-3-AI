@@ -1,105 +1,209 @@
+
+----------------------- 
+-- National Spells
+
+-- Conj 7 LA Ermor
 #selectspell "Revive Wraith Consul"
 #school -1
 #end
 
+-- Conj 7 LA Ermor
 #selectspell "Great Lamentation"
 #school -1
 #end
 
+-- Conj 8 LA Ermor
 #selectspell "Soul Gate"
 #school -1
 #end
 
+-- Conj 8 LA Ermor
 #selectspell "Lictorian Legion"
 #school -1
 #end
 
-
+-- Ench 8 EA Pan, MA Pan, LA Pan
 #selectspell "Carrion Woods"
 #school -1
 #end
 
+-- Ench 8 EA Pan, MA Pan, LA Pan
 #selectspell "Carrion Growth"
 #school -1
 #end
 
+-- Conj 7 EA C'tis, MA C'tis, LA C'tis
 #selectspell "Contact Couatl"
 #school -1
 #end
 
+-- Conj 9 EA C'tis, MA C'tis, LA C'tis
 #selectspell "Devourer of Souls"
 #school -1
 #end
 
+-- Conj 8 EA Caelum, MA Caelum, LA Caelum
 #selectspell "Call Amesha Spenta"
 #school -1
 #end
 
-
+-- Conj 7 MA Pythium, MA Marignon, LA Marignon
 #selectspell "Angelic Host"
 #school -1
 #end
 
+-- Conj 7 MA Pythium, MA Marignon, LA Marignon
 #selectspell "Heavenly Wrath"
 #school -1
 #end
 
+-- Conj 9 MA Pythium, MA Marignon, LA Marignon
 #selectspell "Heavenly Choir"
 #school -1
 #end
 
+-- Blood 7 LA Marignon
 #selectspell "Reascendance"
 #school -1
 #end
 
-#selectspell "Contact Couatl"
-#school -1
-#end
-
+-- Conj 7 MA Mictlan, LA Mictlan
 #selectspell "Summon Tlaloque"
 #school -1
 #end
 
+-- Blood 7 EA Mictlan, MA Mictlan, LA Mictlan
 #selectspell "Contact Onaqui"
 #school -1
 #end
 
+-- Blood 8 EA Mictlan, MA Mictlan, LA Mictlan
 #selectspell "Rain of Jaguars"
 #school -1
 #end
 
+-- Conj 7 LA T'ien Chi
 #selectspell "Wrath of the Ancestors"
 #school -1
 #end
 
-
+-- Conj 7 EA Kailasa, MA Bandor Log, LA Patala
 #selectspell "Summon Siddha"
 #school -1
 #end
 
+-- Conj 8 EA Kailasa, MA Bandor Log, LA Patala
 #selectspell "Summon Devata"
 #school -1
 #end
-
  
+-- Conj 8 MA Shinuyama, LA Jomon
 #selectspell "Summon Dai Oni"
 #school -1
 #end
 
-
+-- Conj 8 LA Agartha
 #selectspell "Hall of the Dead"
 #school -1
 #end
 
+-- Conj 8 EA Abysia, EA C'tis, MA Abysia, MA C'tis, LA Abysia, LA C'tis
+#selectspell "Summon Scorpion Man"
+#school -1
+#end
 
---- 
+-- Blood 7 MA Bandor Log, LA Patala, EA Lanka
+#selectspell "Summon Samanishada"
+#school -1
+#end
+
+-- Blood 8 MA Bandor Log, LA Patala, Ea Lanka
+#selectspell "Summon Mandeha"
+#school -1
+#end
+
+-- Blood 8 MA Bandor Log, LA Patala, Ea Lanka
+#selectspell "Summon Davanas"
+#school -1
+#end
+
+-- Conj 9 EA Kailasa, MA Bandor Log, LA Patala
+#selectspell "Summon Devala"
+#school -1
+#end
+
+-- Conj 9 EA Kailasa, MA Bandor Log, LA Patala
+#selectspell "Summon Rudra"
+#school -1
+#end
+
+-- Conj 9 EA Sauromatia, LA Pythium
+#selectspell "Daughter of Typhon"
+#school -1
+#end
+
+-- Conj 8 EA Fomoria
+#selectspell "Dance of the Morrigans"
+#school -1
+#end
+
+-- Blood 9 EA Hinnom
+#selectspell "Release Lord of Civilization"
+#school -1
+#end
+
+-- Conj 8 MA Ulm
+#selectspell "Contact Iron Angel"
+#school -1
+#end
+
+-- Conj 7 MA Ashdod, LA Gath
+#selectspell "Call Arel"
+#school -1
+#end
+
+-- Conj 8 MA Ashdod, LA Gath
+#selectspell "Call Ophan"
+#school -1
+#end
+
+-- Conj 8 MA Ashdod
+#selectspell "Banquet for the Dead"
+#school -1
+#end
+
+-- Conj 9 MA Ashdod, LA Gath
+#selectspell "Call Merkavah"
+#school -1
+#end
+
+-- Conj 7 LA Jomon
+#selectspell "Contact Yama-no-kami"
+#school -1
+#end
+
+-- Conj 7 LA Bogarus
+#selectspell "Contact Cloud Vila"
+#school -1
+#end
+
+-- Conj 7 LA Bogarus
+#selectspell "Contact Mountain Vila"
+#school -1
+#end
+
+-- Conj 8 LA Bogarus
+#selectspell "Contact Leshiy"
+#school -1
+#end
 
 
+----------------------- 
+-- Evocation Level 7
 
 #selectspell "Fire Storm"
 #school -1
 #end
-
 
 #selectspell "Ice Strike"
 #school -1
@@ -113,16 +217,13 @@
 #school -1
 #end
 
-
 #selectspell "Shimmering Fields"
 #school -1
 #end
 
-
 #selectspell "Rain of Stones"
 #school -1
 #end
-
 
 #selectspell "Cloud of Death"
 #school -1
@@ -132,12 +233,15 @@
 #school -1
 #end
 
-
 #selectspell "Nether Darts"
 #school -1
 #end
 
+#selectspell "Storm of Thorns"
+#school -1
+#end
 
+-- Evocation Level 8
 
 #selectspell "Pillar of Fire"
 #school -1
@@ -147,17 +251,15 @@
 #school -1
 #end
 
-
 #selectspell "Maelstrom"
 #school -1
 #end
-
 
 #selectspell "Astral Tempest"
 #school -1
 #end
 
-
+-- Evocation Level 9
 
 #selectspell "Flames from the Sky"
 #school -1
@@ -171,7 +273,6 @@
 #school -1
 #end
 
-
 #selectspell "Niefel Flames"
 #school -1
 #end
@@ -180,21 +281,17 @@
 #school -1
 #end
 
-
 #selectspell "Strands of Arcane Power"
 #school -1
 #end
 
 
-
----   
-
-  
+----------------------- 
+-- Alteration Level 7
 
 #selectspell "Phoenix Pyre"
 #school -1
 #end
-
 
 #selectspell "Phantasmal Attack"
 #school -1
@@ -204,7 +301,6 @@
 #school -1
 #end
 
-
 #selectspell "Prison of Sedna"
 #school -1
 #end
@@ -212,7 +308,6 @@
 #selectspell "Sea of Ice"
 #school -1
 #end
-
 
 #selectspell "Iron Walls"
 #school -1
@@ -222,16 +317,13 @@
 #school -1
 #end
 
-
 #selectspell "Doom"
 #school -1
 #end
 
-
 #selectspell "Bone Grinding"
 #school -1
 #end
-
 
 #selectspell "Creeping Doom"
 #school -1
@@ -245,17 +337,19 @@
 #school -1
 #end
 
+-- Alteration Level 8
 
+#selectspell "Conflagration"
+#school -1
+#end
 
 #selectspell "Fata Morgana"
 #school -1
 #end
-
   
 #selectspell "Quickening"
 #school -1
 #end
-
 
 #selectspell "Wizard's Tower"
 #school -1
@@ -264,23 +358,20 @@
 #selectspell "Crumble"
 #school -1
 #end
-
   
 #selectspell "Will of the Fates"
 #school -1
 #end
 
-
 #selectspell "Disintegrate"
 #school -1
 #end
-
 
 #selectspell "Polymorph"
 #school -1
 #end
 
-
+-- Alteration Level 9
 
 #selectspell "Army of Gold"
 #school -1
@@ -290,7 +381,6 @@
 #school -1
 #end
 
-
 #selectspell "Arcane Domination"
 #school -1
 #end
@@ -299,25 +389,25 @@
 #school -1
 #end
 
-
 #selectspell "Utterdark"
 #school -1
 #end
 
 
----
-  
+----------------------- 
+-- Conjuration Level 7
 
-
-#selectspell "King of Elemental Fire"
+#selectspell "Living Fire"
 #school -1
 #end
 
-
-#selectspell "Queen of Elemental Air"
+#selectspell "Living Clouds"
 #school -1
 #end
 
+#selectspell "Living Water"
+#school -1
+#end
 
 #selectspell "Summon Catoblepas"
 #school -1
@@ -327,17 +417,10 @@
 #school -1
 #end
 
-#selectspell "Queen of Elemental Water"
+#selectspell "Living Earth"
 #school -1
 #end
-
-
-#selectspell "King of Elemental Earth"
-#school -1
-#end
-
-
-
+#
 #selectspell "Summon Mound Fiend"
 #school -1
 #end
@@ -349,11 +432,6 @@
 #selectspell "Call Wraith Lord"
 #school -1
 #end
-
-#selectspell "King of Banefires"
-#school -1
-#end
-
 
 #selectspell "Animal Horde"
 #school -1
@@ -367,19 +445,25 @@
 #school -1
 #end
 
+-- Conjuration Level 8
 
-
-#selectspell "Living Fire"
+#selectspell "King of Elemental Fire"
 #school -1
 #end
 
-
-#selectspell "Living Clouds"
+#selectspell "Queen of Elemental Air"
 #school -1
 #end
 
+#selectspell "Queen of Elemental Water"
+#school -1
+#end
 
-#selectspell "Living Water"
+#selectspell "King of Elemental Earth"
+#school -1
+#end
+
+#selectspell "King of Banefires"
 #school -1
 #end
 
@@ -387,15 +471,9 @@
 #school -1
 #end
 
-
 #selectspell "Earth Attack"
 #school -1
 #end
-
-#selectspell "Living Earth"
-#school -1
-#end
-
 
 #selectspell "Manifestation"
 #school -1
@@ -409,11 +487,6 @@
 #school -1
 #end
 
-
-#selectspell "Dragon Master"
-#school -1
-#end
-
 #selectspell "Wild Growth"
 #school -1
 #end
@@ -422,17 +495,15 @@
 #school -1
 #end
 
-
+-- Conjuration Level 9
 
 #selectspell "The Kindly Ones"
 #school -1
 #end
 
-
 #selectspell "Call Abomination"
 #school -1
 #end
-
 
 #selectspell "Ghost Riders"
 #school -1
@@ -445,7 +516,6 @@
 #selectspell "Tartarian Gate"
 #school -1
 #end
-
 
 #selectspell "Awaken Tarrasque"
 #school -1
@@ -460,9 +530,8 @@
 #end
 
   
----
-
-
+----------------------- 
+-- Construction Level 7
 
 #selectspell "Weapons of Sharpness"
 #school -1
@@ -476,11 +545,11 @@
 #school -1
 #end
 
-
 #selectspell "Golem Construction"
 #school -1
 #end
 
+-- Construction Level 9
 
 #selectspell "Siege Golem"
 #school -1
@@ -498,34 +567,29 @@
 #school -1
 #end
 
-
 #selectspell "Poison Golem"
 #school -1
 #end
 
 
----   
-
+----------------------- 
+-- Enchantment Level 7
 
 #selectspell "Dome of Flaming Death"
 #school -1
 #end
 
-
 #selectspell "Mass Flight"
 #school -1
 #end
 
-
 #selectspell "Ghost Ship Armada"
 #school -1
 #end
-
   
 #selectspell "Earth Blood Deep Well"
 #school -1
 #end
-
 
 #selectspell "Solar Brilliance"
 #school -1
@@ -534,7 +598,6 @@
 #selectspell "Stellar Focus"
 #school -1
 #end
-
 
 #selectspell "Carrion Reanimation"
 #school -1
@@ -552,7 +615,6 @@
 #school -1
 #end
 
-
 #selectspell "Serpent's Blessing"
 #school -1
 #end
@@ -566,16 +628,15 @@
 #end
 
 
+-- Enchantment Level 8 
 
 #selectspell "Warriors of Muspelheim"
 #school -1
 #end
 
-
 #selectspell "Warriors of Niefelheim"
 #school -1
 #end
-
 
 #selectspell "Storm Warriors"
 #school -1
@@ -585,21 +646,21 @@
 #school -1
 #end
 
-
 #selectspell "Wrath of the Sea"
 #school -1
 #end
-
 
 #selectspell "Lichcraft"
 #school -1
 #end
 
+#selectspell "Dragon Master"
+#school -1
+#end
 
 #selectspell "Unraveling"
 #school -1
 #end
-
 
 #selectspell "Mass Regeneration"
 #school -1
@@ -609,7 +670,7 @@
 #school -1
 #end
 
-
+-- Enchantment Level 9 
 
 #selectspell "Thetis' Blessing"
 #school -1
@@ -618,17 +679,14 @@
 #selectspell "Demon Cleansing"
 #school -1
 #end
-
   
 #selectspell "Arcane Nexus"
 #school -1
 #end
-
   
 #selectspell "Army of the Dead"
 #school -1
 #end
-
    
 #selectspell "Gaia's Blessing"
 #school -1
@@ -639,26 +697,18 @@
 #end
 
 
----   
-
-
+----------------------- 
+-- Thaumaturgy Level 7
 
 #selectspell "Purgatory"
 #school -1
 #end
 
-
 #selectspell "Dark Skies"
 #school -1
 #end
 
-
 #selectspell "Lure of the Deep"
-#school -1
-#end
-
-
-#selectspell "Telestic Animation"
 #school -1
 #end
 
@@ -666,27 +716,27 @@
 #school -1
 #end
 
-
 #selectspell "Plague"
 #school -1
 #end
-
 
 #selectspell "Charm"
 #school -1
 #end
 
+-- Thaumaturgy Level 8
 
+#selectspell "Hydrophobia"
+#school -1
+#end
 
 #selectspell "Gale Gate"
 #school -1
 #end
 
-
 #selectspell "Soul Drain"
 #school -1
 #end
-
 
 #selectspell "Stygian Paths"
 #school -1
@@ -696,7 +746,7 @@
 #school -1
 #end
 
-
+-- Thaumaturgy Level 9
 
 #selectspell "Astral Travel"
 #school -1
@@ -706,16 +756,12 @@
 #school -1
 #end
 
-
 #selectspell "Undead Mastery"
 #school -1
 #end
 
-
-
----
-
-
+----------------------- 
+-- Blood Level 7
 
 #selectspell "Leech"
 #school -1
@@ -749,7 +795,11 @@
 #school -1
 #end
 
+#selectspell "Send Dream Horror"
+#school -1
+#end
    
+-- Blood Level 8
 
 #selectspell "Rush of Strength"
 #school -1
@@ -775,13 +825,13 @@
 #school -1
 #end
 
-
-
-#selectspell "Blood Vengeance"
+#selectspell "Life for a Life"
 #school -1
 #end
 
-#selectspell "Life for a Life"
+-- Blood Level 9
+
+#selectspell "Blood Vengeance"
 #school -1
 #end
 
@@ -813,10 +863,6 @@
 #school -1
 #end
 
-  
----    
-  
-
 #selectspell "Infernal Prison"
 #school -1
 #end
@@ -824,49 +870,11 @@
 #selectspell "Claws of Kokytos"
 #school -1
 #end
-
-
-#selectspell "Astral Geyser"
-#school -1
-#end
-
-
-#selectspell "Storm of Thorns"
-#school -1
-#end
-
-
-#selectspell "Summon Scorpion Man"
-#school -1
-#end
-
-#selectspell "Summon Scorpion Man"
-#school -1
-#end
-
-#selectspell "Summon Samanishada"
-#school -1
-#end
-
-#selectspell "Summon Mandeha"
-#school -1
-#end
-
-#selectspell "Summon Davanas"
-#school -1
-#end
-
-#selectspell "Summon Devala"
-#school -1
-#end
-
-
----------------------
-
-Artifact restrictions
-
   
-  
+
+------------------------
+-- Artifact restrictions
+
 #selectitem "O'al Kan's Sceptre"
 #constlevel 12
 #end

@@ -1,5 +1,5 @@
 --Description: 
-#god 45 156 --Cyclops -- Eriu
+#god 45 156 --Cyclops -- Ashdod
 #additem "Fire Brand"
 #additem "Charcoal Shield"
 #additem "Horror Helmet"
