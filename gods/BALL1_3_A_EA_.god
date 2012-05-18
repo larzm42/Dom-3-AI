@@ -5,7 +5,7 @@
 -- #mag_air 0
 -- #mag_water 0
 -- #mag_earth 0
-#mag_astral 4
+#mag_astral 9
 -- #mag_death 0
 -- #mag_nature 0
 -- #mag_blood 0

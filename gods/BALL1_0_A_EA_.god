@@ -12,9 +12,9 @@
 #additem "Amulet of Missile Protection" -- misc slot
 #dominionstr 0 10
 #scale_chaos 0 -2
-#scale_lazy 0 -1
+#scale_lazy 0 1
 -- #scale_cold 0 0
 #scale_death 0 -2
 -- #scale_unluck 0 0
-#scale_unmagic 0 2
+#scale_unmagic 0 -1
 -- 4 points left if we were dormant...

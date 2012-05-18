@@ -1,5 +1,5 @@
 #god 17 605 -- Niefelheim SON OF NIEFEL
-@RANDOM comname GOD_MALE_WIZARD
+@RANDOM comname COMMANDER
 #clearmagic
 -- #mag_fire 0
 -- #mag_air 0

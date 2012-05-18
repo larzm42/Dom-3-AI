@@ -1,5 +1,5 @@
 #god 2 1340 -- Ulm LORD OF WAR
-@RANDOM comname GOD_MALE_WIZARD
+@RANDOM comname COMMANDER
 #clearmagic
 -- #mag_fire 0
 #mag_air 3
@@ -21,6 +21,6 @@
 #scale_lazy 2 -3
 #scale_cold 2 2
 #scale_death 2 -1
-#scale_unluck 2 3
+#scale_unluck 2 0
 #scale_unmagic 2 3
 -- 7 points left if we were dormant...

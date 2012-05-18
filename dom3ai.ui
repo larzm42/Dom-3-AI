@@ -665,7 +665,7 @@
       </font>
      </property>
      <property name="title">
-      <string>Independants</string>
+      <string>Independents</string>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_4">
       <item>
@@ -679,7 +679,7 @@
            </font>
           </property>
           <property name="text">
-           <string>No Recruitable Independants</string>
+           <string>No Recruitable Independents</string>
           </property>
           <property name="checked">
            <bool>true</bool>
@@ -699,7 +699,7 @@
            </font>
           </property>
           <property name="text">
-           <string>Better Independants Mod</string>
+           <string>Better Independents Mod</string>
           </property>
          </widget>
         </item>

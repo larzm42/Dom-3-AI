@@ -28,13 +28,13 @@
 #mag_death 2
 #mag_nature 4
 #mag_water 2
-#dominionstr 64 6
-#scale_chaos 64 -3
-#scale_lazy 64 -3
-#scale_cold 64 0
-#scale_death 64 -3
-#scale_unluck 64 1
-#scale_unmagic 64 0
+#dominionstr 0 6
+#scale_chaos 0 -3
+#scale_lazy 0 3
+#scale_cold 0 0
+#scale_death 0 -3
+#scale_unluck 0 -1
+#scale_unmagic 0 0
 #units 1 768 --Watcher (try to pin down)
 #bodyguards 1 768 
 

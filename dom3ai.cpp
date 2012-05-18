@@ -308,9 +308,26 @@ void Dom3AI::on_generateGameButton_clicked()
             QFileInfo exe = QFileInfo(ui->dom3Text->text());
 
             mapFileName = exe.absolutePath() + "/maps/" + newFileName;
-            oldMap.copy(mapFileName);
-            QFileInfo mapFile = QFileInfo(mapFileName);
-            dmFileName = exe.absolutePath() + "/mods/" + mapFile.baseName() + ".dm";
+
+            oldMap.open(QIODevice::ReadOnly);
+
+            QFile mapFile(mapFileName);
+            mapFile.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text);
+
+            QTextStream in(&oldMap);
+            QTextStream out(&mapFile);
+            QString line;
+            while (!in.atEnd()) {
+                line = in.readLine();
+                if (line.startsWith("#dom2title")) {
+                    line.append(" (dom3AI version)");
+                }
+                out << line << '\n';
+            }
+            mapFile.close();
+
+            QFileInfo mapFileInfo = QFileInfo(mapFileName);
+            dmFileName = exe.absolutePath() + "/mods/" + mapFileInfo.baseName() + ".dm";
             generateGame();
         } else {
             QMessageBox msgBox(QMessageBox::Warning, tr("Warning"),
@@ -455,11 +472,23 @@ void Dom3AI::generateGame()
     // Add the strategies
     addStrategiesToDm(strategies);
 
-    // Tell the user what to do
-    QMessageBox msgBox(QMessageBox::Information, tr("Instructions"),
-                       "Dominions 3 will now be launched. To start the game select \"Create a New Game\". Hit \"Add New Player\" until no more can be added (no need to select nations). Then select the nation you chose to play. Start the game and you're ready to go!", 0, this);
-    msgBox.addButton(tr("&Continue"), QMessageBox::RejectRole);
-    msgBox.exec();
+
+    int ret = QMessageBox::information(this, tr("Launch"),
+                                    tr("Launch Dominions 3?"),
+                                    QMessageBox::Yes | QMessageBox::No);
+    if (ret == QMessageBox::Yes) {
+        // Tell the user what to do
+        QMessageBox msgBox(QMessageBox::Information, tr("Instructions"),
+                           "Dominions 3 will now be launched. To start the game select \"Create a New Game\". Hit \"Add New Player\" until no more can be added (no need to select nations). Then select the nation you chose to play. Start the game and you're ready to go!", 0, this);
+        msgBox.addButton(tr("&Continue"), QMessageBox::RejectRole);
+        msgBox.exec();
+    } else {
+        QMessageBox msgBox(QMessageBox::Information, tr("Instructions"),
+                           "To start the game select \"Create a New Game\". Hit \"Add New Player\" until no more can be added (no need to select nations). Then select the nation you chose to play. Start the game and you're ready to go!", 0, this);
+        msgBox.addButton(tr("&Continue"), QMessageBox::RejectRole);
+        msgBox.exec();
+        return;
+    }
 
 
     // Generate the game

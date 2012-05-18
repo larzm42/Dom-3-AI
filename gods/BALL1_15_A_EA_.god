@@ -1,5 +1,5 @@
 #god 15 501 -- Vanheim ALLFATHER
-@RANDOM comname GOD_MALE_WIZARD
+@RANDOM comname COMMANDER
 #clearmagic
 -- #mag_fire 0
 #mag_air 4
