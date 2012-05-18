@@ -79,6 +79,7 @@ QString borderwidth = "15";
 
 QString mapFileName;
 QString dmFileName;
+QString mapStringName;
 
 Graph G;
 random::mt19937 gen;
@@ -250,6 +251,7 @@ void Dom3AI::on_generateGameButton_clicked()
     int i = dist(gen);
     if (ui->randomMapRadio->isChecked()) {
         mapFileName = "dom3AI_" + QString::number(i);
+        mapStringName = mapFileName;
         QStringList args;
         args << "--makemap" << mapFileName
              << "--riverpart" << riverpart
@@ -268,8 +270,7 @@ void Dom3AI::on_generateGameButton_clicked()
              << "--mapsbcol" << mapsbcol1 << mapsbcol2 << mapsbcol3 << mapsbcol4
              << "--mapnoise" << mapnoise
              << "--borderwidth" << borderwidth
-             << "--textonly"
-             << "-d";
+             << "--textonly";
 
         QString program = ui->dom3Text->text();
 
@@ -320,7 +321,9 @@ void Dom3AI::on_generateGameButton_clicked()
             while (!in.atEnd()) {
                 line = in.readLine();
                 if (line.startsWith("#dom2title")) {
-                    line.append(" (dom3AI version)");
+                    QFileInfo mapInfo(mapFileName);
+                    line.append(" (" + mapInfo.baseName() + ")");
+                    mapStringName = line.mid(11);
                 }
                 out << line << '\n';
             }
@@ -483,10 +486,22 @@ void Dom3AI::generateGame()
         msgBox.addButton(tr("&Continue"), QMessageBox::RejectRole);
         msgBox.exec();
     } else {
-        QMessageBox msgBox(QMessageBox::Information, tr("Instructions"),
-                           "To start the game select \"Create a New Game\". Hit \"Add New Player\" until no more can be added (no need to select nations). Then select the nation you chose to play. Start the game and you're ready to go!", 0, this);
+        QFileInfo mapFileInfo(mapFileName);
+        QFileInfo dmInfo(dmFileName);
+
+        QString message;
+        if (dmInfo.exists()) {
+            message = "First, select Mod Preferences and enable the \"AI Improvement for " + mapFileInfo.baseName() + "\" mod. Then start the game by selecting \"Create a New Game\". Choose the \"" + mapStringName+ "\" map. Hit \"Add New Player\" until no more can be added (no need to select nations). Then select the nation you chose to play. Start the game and you're ready to go!";
+        } else {
+            message = "Start the game by selecting \"Create a New Game\". Choose the \"" + mapStringName+ "\" map. Hit \"Add New Player\" until no more can be added (no need to select nations). Then select the nation you chose to play. Start the game and you're ready to go!";
+        }
+
+        QMessageBox msgBox(QMessageBox::Information, tr("Instructions"), message, 0, this);
         msgBox.addButton(tr("&Continue"), QMessageBox::RejectRole);
         msgBox.exec();
+        mapFileName = "";
+        dmFileName = "";
+        mapStringName = "";
         return;
     }
 
@@ -499,8 +514,7 @@ void Dom3AI::generateGame()
     if (dmInfo.exists()) {
         args << "--enablemod" << dmInfo.fileName();
     }
-    args << "--era" << QString::number(ui->eraCombo->currentIndex()+1)
-         << "-d";
+    args << "--era" << QString::number(ui->eraCombo->currentIndex()+1);
 
     QString program = ui->dom3Text->text();
 
@@ -520,7 +534,7 @@ void Dom3AI::createDMFile()
 
         QFileInfo mapFileInfo(mapFileName);
 
-        out << "#modname \"AI Improvement Mod for " << mapFileInfo.baseName() << "\"" << '\n';
+        out << "#modname \"AI Improvement for " << mapFileInfo.baseName() << "\"" << '\n';
         out << "#description \"This is the Dominions 3 AI Improvement Mod. This mod tries to increase the intelligence of the AI in single player games.\"" << '\n';
         out << "#version 1.00" << '\n';
         out << "#icon \"dom3ai.tga\"" << '\n';
