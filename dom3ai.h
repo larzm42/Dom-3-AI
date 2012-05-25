@@ -66,6 +66,7 @@ private slots:
     void poll_map_file();
     void generateGame();
     void on_eraCombo_currentIndexChanged(const QString &arg1);
+    void on_quitButton_clicked();
 
 private:
     Ui::Dom3AI *ui;

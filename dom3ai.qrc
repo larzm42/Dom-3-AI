@@ -1,6 +1,5 @@
 <RCC>
     <qresource prefix="/">
-        <file>settings.txt</file>
         <file>dom3ai.tga</file>
         <file>eater.png</file>
         <file>mods/better_independents_v2-1.dm</file>

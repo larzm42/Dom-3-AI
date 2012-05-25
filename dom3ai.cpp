@@ -38,6 +38,7 @@
 #include <QSettings>
 #include <QCloseEvent>
 #include <QtGui>
+#include <QtGui/QApplication>
 #include "nationdialog.h"
 #include "dom3ai.h"
 #include "ui_dom3ai.h"
@@ -923,7 +924,7 @@ void Dom3AI::writeSettings()
      ui->dom3Text->setText(settings.value("dom3exe", "").toString());
      settings.endGroup();
 
-     QFile setupFile(":/settings.txt");
+     QFile setupFile(QDir::current().absolutePath() + "/settings.txt");
      setupFile.open(QIODevice::ReadOnly);
 
      QTextStream in(&setupFile);
@@ -1066,4 +1067,9 @@ void Dom3AI::on_eraCombo_currentIndexChanged(const QString &arg1)
     while (iter.hasNext()) {
         ui->playerNationCombo->addItem(iter.next().name);
     }
+}
+
+void Dom3AI::on_quitButton_clicked()
+{
+    QApplication::quit();
 }

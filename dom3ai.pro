@@ -6,9 +6,9 @@
 
 QT       += core gui
 
-TARGET = Dom3AI
+TARGET = dom3ai
 TEMPLATE = app
-
+RC_FILE = dom3ai.rc
 
 SOURCES += main.cpp \
     dom3ai.cpp \
