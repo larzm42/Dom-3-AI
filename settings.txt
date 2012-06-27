@@ -1,6 +1,7 @@
+-- These are the settings used for generating random maps.
 [MAP]
 riverpart 100
-seapart 0
+seapart 5
 mountpart 50
 forestpart 30 
 farmpart 20
@@ -14,6 +15,10 @@ mapsbcol 40 120 200 100
 mapnoise 100
 borderwidth 15
 
+-- Define the possible nations for each era. To add a mod nation, just include
+-- it's name along with nation number in the proper era. A * infront of the name
+-- indicates a coastal start is prefered. The aquatic nations are currently
+-- commented out as they are not supported.
 [EA]
 0 Arcoscephale
 1 Ermor
@@ -70,7 +75,7 @@ borderwidth 15
 50 Ermor
 51 Man
 52 Ulm
-53 Marignon
+53 *Marignon
 54 Mictlan
 55 T'ien Ch'i
 56 Jomon
@@ -83,8 +88,7 @@ borderwidth 15
 63 Utgard
 64 Patala
 65 Gath
-66 Atlantis
+66 *Atlantis
 --67 R'lyeh
 70 Pythium
 71 Bogarus
-

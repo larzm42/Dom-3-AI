@@ -14,7 +14,7 @@
 #additem "Amulet of Antimagic" 		-- misc slot
 #additem "Ring of Regeneration" 	-- misc slot
 #dominionstr 4 10
--- #scale_chaos 4 0
+#scale_chaos 4 -1
 #scale_lazy 4 -1
 -- #scale_cold 4 0
 #scale_death 4 -1

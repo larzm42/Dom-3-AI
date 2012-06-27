@@ -14,7 +14,7 @@
 #god 68 656 --Fountain of Blood
 #additem "Soul Contract" -- +1 devil/turn
 #additem "Skull Mentor" -- +Research
-#additem "Ring of Wizardy" -- +1 all paths, +1pen
+#additem "Ring of Wizardry" -- +1 all paths, +1pen
 #additem "Crystal Matrix" -- Automatic communion master
 #clearmagic
 #mag_air 6

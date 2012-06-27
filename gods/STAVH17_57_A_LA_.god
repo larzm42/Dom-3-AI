@@ -51,7 +51,7 @@
 20 1437 --Blindfighter
 
 --Add'l researcher
-#commander 10 1444 --Blindlord
+#commander 1444 --Blindlord
 #additem "Skull Mentor"
 #additem "Elixir of Life"
 #additem "Skull Staff"

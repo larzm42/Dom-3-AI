@@ -18,7 +18,7 @@
 #additem "Rainbow Armor" -- +MR, +reinvig
 #additem "Chi Shoes" --Add'l kick attack
 #additem "Skull Mentor" -- +Research
-#additem "Ring of Wizardy" -- +1 all paths, +1pen
+#additem "Ring of Wizardry" -- +1 all paths, +1pen
 #clearmagic
 #mag_air 6
 #mag_astral 9

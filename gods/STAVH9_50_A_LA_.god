@@ -17,7 +17,7 @@
 #god 50 680 --Wraith Senator (more magey graphic than Consul)
 #god 50 774 --Tartarian Titan (female)
 #god 50 872 --Ghost King
-#additem "Rod of Death' -- Control the Dead (Artifact)
+#additem "Rod of Death" -- Control the Dead (Artifact)
 #additem "Skullface" -- +D and +support chaff summon
 #additem "Bone Armor" -- +Soul Vortex
 #additem "Amulet of Antimagic" -- +MR

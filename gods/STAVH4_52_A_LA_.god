@@ -45,7 +45,7 @@
 #commander 400 --Skinshifter 
 #additem "Black Steel Full Plate"
 #additem "Girdle of Might"
-#additem "Lycanthropos' Amulet"
+#additem "Lychantropos' Amulet"
 #bodyguards 5 1224 --Dire Wolf
 #units 20 1015	--Infantry of Ulm
 #units 20 1017	--Ranger of Ulm
@@ -55,7 +55,7 @@
 #commander 1161 --Antlered Shaman (from Ulm EA)
 #additem "Dwarven Hammer"
 #additem "Birch Boots"
-#additem "Elixer of Life"
+#additem "Elixir of Life"
 #additem "Bracers of Protection"
 #clearmagic
 #mag_earth 2

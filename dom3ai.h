@@ -36,17 +36,19 @@ public:
     struct TerrainData {
         int province;
         uint terrainMask;
+        bool coastal;
     };
 
     struct NationData {
         int number;
         QString name;
+        bool coastal;
         inline bool operator==(const NationData &s) const
         { return s.number == number; }
     };
 
     struct NationStrategy {
-        int number;
+        NationData nationData;
         QStringList god;
         QStringList dm;
     };
@@ -77,25 +79,28 @@ private:
     QList<NationData> lateNations;
     QList<NationData> selectedNations;
     QMultiMap<int, NationStrategy> nationStrategies;
-    QList<TerrainData> terrainList;
+    QList<TerrainData*> terrainList;
 
     void readSettings();
     void writeSettings();
     void parseMap(QString fileName);
     void readGods();
-    QList<int> chooseNations();
-    QList<NationStrategy> chooseStrategies(QList<int> nations);
-    QList<int> chooseProvinces(int numNations);
-    QList<int> possibleProvinces(int minNeighbors);
+    QList<NationData> chooseNations();
+    QList<NationStrategy> chooseStrategies(QList<NationData> nations);
+    QList<int> chooseProvinces(QList<NationData> nations);
+    QList<int> possibleProvinces(int minNeighbors, bool picky);
+    NationData getPlayerNation();
+    void markCoastalProvinces();
+    int getCoastalProvinceCount(QList<int> possibleProvinceList);
     void addStrategiesToMap(QList<NationStrategy> strategies, QList<int> provinces);
-    void addAllowedPlayersToMap(QList<Dom3AI::NationStrategy> strategies);
+    void addAllowedPlayersToMap(QList<Dom3AI::NationStrategy> strategies, QList<int> provinces);
     void addPlayerStart(QList<int> provinces);
     void addStrategiesToDm(QList<Dom3AI::NationStrategy> strategies);
     void createDMFile();
     void addAlliesToMap(QList<QList<int> > teams);
     void addNoIndyToMap();
-    bool place(QList<int> * possibleProvinceList, QList<int> * chosenProvinces, uint minDistance, int numNations);
-    bool tryToPlace(QList<int> * possibleProvinceList, QList<int> * chosenProvinces, uint minDistance);
+    bool place(QList<int> * possibleProvinceList, QList<int> * chosenProvinces, uint minDistance, int numNations, int coastalStarts);
+    bool tryToPlace(QList<int> * possibleProvinceList, QList<int> * chosenProvinces, uint minDistance, int coastalStarts);
     QString expandRandom(QString command, QString file);
     bool isMapValid(QString fileName);
 

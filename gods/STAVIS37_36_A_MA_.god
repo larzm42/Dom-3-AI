@@ -17,7 +17,7 @@
 #god 36 471 --Golem
 #additem "Wraith Sword"
 #additem "Black Steel Helmet"
-#additem "Stone Boots"
+#additem "Boots of Stone"
 #additem "Elemental Armor"
 #additem "Lychantropos' Amulet" --Berserk to force attack
 #additem "Girdle of Might"

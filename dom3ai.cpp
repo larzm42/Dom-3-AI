@@ -50,7 +50,7 @@ typedef adjacency_list<vecS, vecS, undirectedS> Graph;
 typedef std::pair<int, int> Edge;
 
 QString riverpart = "100";
-QString seapart = "0";
+QString seapart = "5";
 QString mountpart = "50";
 QString forestpart = "30";
 QString farmpart = "20";
@@ -115,7 +115,7 @@ bool Dom3AI::isMapValid(QString fileName)
     QString line;
     while (!in.atEnd()) {
         line = in.readLine();
-        if (line.startsWith("#neighbour")) {
+        if (line.startsWith("#terrain")) {
             valid = true;
         }
     }
@@ -143,9 +143,10 @@ void Dom3AI::parseMap(QString fileName)
             numEdges++;
         } else if (line.startsWith("#terrain")) {
             QStringList strList = line.split(" ");
-            TerrainData data;
-            data.province = strList.at(1).toInt();
-            data.terrainMask = strList.at(2).toUInt();
+            TerrainData *data = new TerrainData();
+            data->province = strList.at(1).toInt();
+            data->terrainMask = strList.at(2).toUInt();
+            data->coastal = false;
             terrainList.append(data);
         }
     }
@@ -166,8 +167,12 @@ void Dom3AI::parseMap(QString fileName)
 
     // add the edges to the graph object
     for (int i = 0; i < numEdges; ++i) {
-      add_edge(edge_array[i].first-1, edge_array[i].second-1, G);
+        add_edge(edge_array[i].first-1, edge_array[i].second-1, G);
     }
+
+    // Find coastal provinces
+    markCoastalProvinces();
+
 }
 
 void Dom3AI::on_mapBrowseButton_clicked()
@@ -344,9 +349,9 @@ void Dom3AI::on_generateGameButton_clicked()
 
 void Dom3AI::generateGame()
 {
-    QList<int> nations = chooseNations();
+    QList<NationData> nations = chooseNations();
     QList<NationStrategy> strategies = chooseStrategies(nations);
-    QList<int> provinces = chooseProvinces(nations.size()+1);
+    QList<int> provinces = chooseProvinces(nations);
     if (provinces.size() != nations.size()+1) {
         QMessageBox msgBox(QMessageBox::Warning, tr("Warning"),
                            "Couldn't fit all of the nations on the map.", 0, this);
@@ -355,11 +360,19 @@ void Dom3AI::generateGame()
         return;
     }
 
-    // Add allowed players
-    addAllowedPlayersToMap(strategies);
+    // If the player is a coastal nation, move coastal prov to end for player
+    if (getPlayerNation().coastal) {
+        int prov = provinces.takeFirst();
+        provinces.append(prov);
+    }
 
-    // Add start for player
-    addPlayerStart(provinces);
+    QList<int> nationNumbers;
+    for (int i = 0; i < nations.size(); i++) {
+        nationNumbers.append(nations.at(i).number);
+    }
+
+    // Add allowed players
+    addAllowedPlayersToMap(strategies, provinces);
 
     // Add stratagies for AIs
     addStrategiesToMap(strategies, provinces);
@@ -368,11 +381,11 @@ void Dom3AI::generateGame()
     if (ui->alliesCombo->currentText() != "0 Teams") {
         QList<QList<int> > teams;
         if (ui->alliesCombo->currentText() == "1 Team") {
-            teams.append(nations);
+            teams.append(nationNumbers);
         } else if (ui->alliesCombo->currentText() == "2 Teams") {
-            QList<int> nationsList1 = nations;
+            QList<int> nationsList1 = nationNumbers;
             QList<int> nationsList2;
-            int teamSize = nations.size()/2;
+            int teamSize = nationNumbers.size()/2;
             for (int i = 0; i < teamSize; i++) {
                 random::uniform_int_distribution<> dist(0, nationsList1.size()-1);
                 nationsList2.append(nationsList1.takeAt(dist(gen)));
@@ -380,10 +393,10 @@ void Dom3AI::generateGame()
             teams.append(nationsList1);
             teams.append(nationsList2);
         } else if (ui->alliesCombo->currentText() == "3 Teams") {
-            QList<int> nationsList1 = nations;
+            QList<int> nationsList1 = nationNumbers;
             QList<int> nationsList2;
             QList<int> nationsList3;
-            int teamSize = nations.size()/3;
+            int teamSize = nationNumbers.size()/3;
             for (int i = 0; i < teamSize; i++) {
                 random::uniform_int_distribution<> dist(0, nationsList1.size()-1);
                 nationsList2.append(nationsList1.takeAt(dist(gen)));
@@ -396,11 +409,11 @@ void Dom3AI::generateGame()
             teams.append(nationsList2);
             teams.append(nationsList3);
         } else if (ui->alliesCombo->currentText() == "4 Teams") {
-            QList<int> nationsList1 = nations;
+            QList<int> nationsList1 = nationNumbers;
             QList<int> nationsList2;
             QList<int> nationsList3;
             QList<int> nationsList4;
-            int teamSize = nations.size()/4;
+            int teamSize = nationNumbers.size()/4;
             for (int i = 0; i < teamSize; i++) {
                 random::uniform_int_distribution<> dist(0, nationsList1.size()-1);
                 nationsList2.append(nationsList1.takeAt(dist(gen)));
@@ -475,7 +488,6 @@ void Dom3AI::generateGame()
 
     // Add the strategies
     addStrategiesToDm(strategies);
-
 
     int ret = QMessageBox::information(this, tr("Launch"),
                                     tr("Launch Dominions 3?"),
@@ -552,10 +564,10 @@ void Dom3AI::createDMFile()
 }
 
 
-QList<int> Dom3AI::chooseNations()
+QList<Dom3AI::NationData> Dom3AI::chooseNations()
 {
     // Get list of nations
-    QList<int> nations;
+    QList<NationData> nations;
     if (ui->randomNationsRadio->isChecked()) {
         QList<int> chosenNationIndex;
         if (ui->eraCombo->currentText() == "Early") {
@@ -566,7 +578,7 @@ QList<int> Dom3AI::chooseNations()
                     possibleNation = dist(gen);
                 }
                 chosenNationIndex.append(possibleNation);
-                nations.append(earlyNations.at(possibleNation).number);
+                nations.append(earlyNations.at(possibleNation));
             }
         } else if (ui->eraCombo->currentText() == "Middle") {
             random::uniform_int_distribution<> dist(0, middleNations.size()-1);
@@ -576,7 +588,7 @@ QList<int> Dom3AI::chooseNations()
                     possibleNation = dist(gen);
                 }
                 chosenNationIndex.append(possibleNation);
-                nations.append(middleNations.at(possibleNation).number);
+                nations.append(middleNations.at(possibleNation));
             }
         } else if (ui->eraCombo->currentText() == "Late") {
             random::uniform_int_distribution<> dist(0, lateNations.size()-1);
@@ -586,37 +598,94 @@ QList<int> Dom3AI::chooseNations()
                     possibleNation = dist(gen);
                 }
                 chosenNationIndex.append(possibleNation);
-                nations.append(lateNations.at(possibleNation).number);
+                nations.append(lateNations.at(possibleNation));
             }
         }
     } else {
         for (int i = 0; i < selectedNations.size(); i++) {
-            nations.append(selectedNations.at(i).number);
+            nations.append(selectedNations.at(i));
         }
     }
     return nations;
 }
 
-QList<Dom3AI::NationStrategy> Dom3AI::chooseStrategies(QList<int> nations)
+QList<Dom3AI::NationStrategy> Dom3AI::chooseStrategies(QList<NationData> nations)
 {
     QList<Dom3AI::NationStrategy> chosenStrategies;
     for (int i = 0; i < nations.size(); i++) {
-        QList<Dom3AI::NationStrategy> stratList = nationStrategies.values(nations[i]);
+        QList<Dom3AI::NationStrategy> stratList = nationStrategies.values(nations[i].number);
         if (stratList.size() == 0) {
-            std::cout << "Nation " << nations[i] << " has no strategies!" << std::endl;
+            std::cout << "Nation " << nations[i].number << " has no strategies!" << std::endl;
             NationStrategy strategy;
-            strategy.number = nations[i];
+            strategy.nationData = nations[i];
             chosenStrategies.append(strategy);
         } else {
             random::uniform_int_distribution<> dist(0, stratList.size()-1);
-            chosenStrategies.append(stratList.at(dist(gen)));
+            if (nations[i].coastal) {
+                // Put coastal nations up front.
+                chosenStrategies.prepend(stratList.at(dist(gen)));
+            } else {
+                chosenStrategies.append(stratList.at(dist(gen)));
+            }
         }
     }
     return chosenStrategies;
 }
 
-QList<int> Dom3AI::possibleProvinces(int minNeighbors)
+void Dom3AI::markCoastalProvinces()
 {
+    typedef property_map<Graph, vertex_index_t>::type IndexMap;
+    IndexMap index = get(vertex_index, G);
+
+    const int number_of_vertices = num_vertices(G);
+
+    for (int i = 0; i < number_of_vertices; i++) {
+        typedef graph_traits<Graph>::adjacency_iterator adj_iter;
+
+        std::pair <adj_iter, adj_iter> adjVerts = adjacent_vertices(i, G);
+
+        QList<int> neighbors;
+        for (; adjVerts.first != adjVerts.second; ++adjVerts.first) {
+            neighbors.append(index[*adjVerts.first]);
+        }
+
+        bool coastal = false;
+        QListIterator<Dom3AI::TerrainData*> iter(terrainList);
+        while (iter.hasNext()) {
+            Dom3AI::TerrainData* terrainData = iter.next();
+            if (neighbors.contains(terrainData->province)) {
+                if (terrainData->terrainMask & 4 ||
+                    terrainData->terrainMask & 2048) {
+                    coastal = true;
+                    break;
+                }
+            }
+        }
+        if (coastal) {
+            iter.toFront();
+            while (iter.hasNext()) {
+                Dom3AI::TerrainData* terrainData = iter.next();
+                if (terrainData->province == i+1) {
+                    if (terrainData->terrainMask & 4 ||
+                        terrainData->terrainMask & 2048) {
+                        // This is a sea prov so not coastal
+                    } else {
+                        terrainData->coastal = true;
+                    }
+                    break;
+                }
+            }
+        }
+
+    }
+
+}
+
+QList<int> Dom3AI::possibleProvinces(int minNeighbors, bool picky)
+{
+    typedef property_map<Graph, vertex_index_t>::type IndexMap;
+    IndexMap index = get(vertex_index, G);
+
     QList<int> possibleProvinces;
     const int number_of_vertices = num_vertices(G);
 
@@ -628,19 +697,21 @@ QList<int> Dom3AI::possibleProvinces(int minNeighbors)
         int count = 0;
         for (; adjVerts.first != adjVerts.second; ++adjVerts.first) {
             count++;
+            std::cout << index[*adjVerts.first] << " ";
         }
+        std::cout << std::endl;
+
         if (count >= minNeighbors) {
             bool goodProvince = true;
             // Make sure it's a startable province
-            QListIterator<Dom3AI::TerrainData> iter(terrainList);
+            QListIterator<Dom3AI::TerrainData*> iter(terrainList);
             while (iter.hasNext()) {
-                Dom3AI::TerrainData terrainData = iter.next();
-                if (terrainData.province == i+1) {
-                    if (terrainData.terrainMask & 4 ||
-                        terrainData.terrainMask & 8 ||
-                        terrainData.terrainMask & 64 ||
-                        terrainData.terrainMask & 512 ||
-                        terrainData.terrainMask & 2048) {
+                Dom3AI::TerrainData* terrainData = iter.next();
+                if (terrainData->province == i+1) {
+                    if (terrainData->terrainMask & 4 ||
+                        (terrainData->terrainMask & 64 && picky) ||
+                        terrainData->terrainMask & 512 ||
+                        terrainData->terrainMask & 2048) {
                         goodProvince = false;
                     }
                 }
@@ -654,7 +725,7 @@ QList<int> Dom3AI::possibleProvinces(int minNeighbors)
     return possibleProvinces;
 }
 
-bool Dom3AI::tryToPlace(QList<int> * possibleProvinceList, QList<int> * chosenProvinces, uint minDistance)
+bool Dom3AI::tryToPlace(QList<int> * possibleProvinceList, QList<int> * chosenProvinces, uint minDistance, int coastalStarts)
 {
     // Randomly choose a province
     random::uniform_int_distribution<> dist(0, possibleProvinceList->size()-1);
@@ -678,75 +749,127 @@ bool Dom3AI::tryToPlace(QList<int> * possibleProvinceList, QList<int> * chosenPr
             return false;
         }
     }
+
+    // Coastal Starts
+    if (chosenProvinces->size() < coastalStarts) {
+        if (!terrainList.at(choice)->coastal) {
+            return false;
+        }
+    }
     chosenProvinces->append(possibleProvinceList->at(choice));
     return true;
 }
 
-bool Dom3AI::place(QList<int> * possibleProvinceList, QList<int> * chosenProvinces, uint minDistance, int numNations)
+bool Dom3AI::place(QList<int> * possibleProvinceList, QList<int> * chosenProvinces, uint minDistance, int numNations, int coastalStarts)
 {
     for (int i = 0; i < 500; i++) {
-        if (tryToPlace(possibleProvinceList, chosenProvinces, minDistance)) {
+        if (tryToPlace(possibleProvinceList, chosenProvinces, minDistance, coastalStarts)) {
             if (chosenProvinces->size() == numNations) {
                 return true;
             } else {
-                if (place(possibleProvinceList, chosenProvinces, minDistance, numNations)) {
+                if (place(possibleProvinceList, chosenProvinces, minDistance, numNations, coastalStarts)) {
                     return true;
                 }
             }
+        }
+        if (i == 100) {
+            coastalStarts--;
+        }
+        if (i == 200) {
+            coastalStarts--;
+        }
+        if (i == 300) {
+            coastalStarts = 0;
         }
     }
     return false;
 }
 
-QList<int> Dom3AI::chooseProvinces(int numNations)
+QList<int> Dom3AI::chooseProvinces(QList<NationData> nations)
 {
     QList<int> chosenProvinces;
     int minNeigbors = 6;
     uint minDistance = 10;
-    QList<int> possibleProvinceList = possibleProvinces(minNeigbors);
+    QList<int> possibleProvinceList = possibleProvinces(minNeigbors, false);
     std::cout << "minNeigbors=" << minNeigbors << " possibleProvinces=" << possibleProvinceList.size() << " minDistance=" << minDistance << std::endl;
-    while (possibleProvinceList.size() < numNations && minNeigbors > 1) {
+    while (possibleProvinceList.size() < nations.size()+1 && minNeigbors > 1) {
         minNeigbors--;
-        possibleProvinceList = possibleProvinces(minNeigbors);
+        possibleProvinceList = possibleProvinces(minNeigbors, minNeigbors > 3);
         std::cout << "minNeigbors=" << minNeigbors << " possibleProvinces=" << possibleProvinceList.size() << " minDistance=" << minDistance << std::endl;
     }
 
-    while (minNeigbors > 1 && !place(&possibleProvinceList, &chosenProvinces, minDistance, numNations)) {
+    // Make sure there are enough coastal provinces
+    int coastalNations = 0;
+    QListIterator<Dom3AI::NationData> nationIter(nations);
+    while (nationIter.hasNext()) {
+        Dom3AI::NationData nationData = nationIter.next();
+        if (nationData.coastal) {
+            coastalNations++;
+        }
+    }
+    if (getPlayerNation().coastal) {
+        coastalNations++;
+    }
+
+    int coastalProvinces = getCoastalProvinceCount(possibleProvinceList);
+    while (minNeigbors > 3 && coastalProvinces < coastalNations) {
+        minNeigbors--;
+        possibleProvinceList = possibleProvinces(minNeigbors, minNeigbors > 3);
+        std::cout << "minNeigbors=" << minNeigbors << " possibleProvinces=" << possibleProvinceList.size() << " minDistance=" << minDistance << " coastalNastions=" << coastalNations << " coastalProv=" << coastalProvinces << std::endl;
+        coastalProvinces = getCoastalProvinceCount(possibleProvinceList);
+    }
+
+    while (minNeigbors > 1 && !place(&possibleProvinceList, &chosenProvinces, minDistance, nations.size()+1, coastalNations)) {
         if (minNeigbors > 4) {
             minNeigbors--;
         } else {
             if (minDistance > 3) {
                 minDistance--;
             } else {
-                if (minNeigbors > 2) {
+                if (minNeigbors > 3) {
                     minNeigbors--;
                 } else {
-                    if (minDistance > 1) {
+                    if (minDistance > 2) {
                         minDistance--;
                     } else {
-                        minNeigbors--;
+                        if (minNeigbors > 2) {
+                            minNeigbors--;
+                        } else {
+                            if (minDistance > 1) {
+                                minDistance--;
+                            } else {
+                                minNeigbors--;
+                            }
+                        }
                     }
                 }
             }
         }
-        possibleProvinceList = possibleProvinces(minNeigbors);
+        possibleProvinceList = possibleProvinces(minNeigbors, minNeigbors > 3);
         std::cout << "minNeigbors=" << minNeigbors << " possibleProvinces=" << possibleProvinceList.size() << " minDistance=" << minDistance << std::endl;
         chosenProvinces.clear();
     }
     return chosenProvinces;
 }
 
-void Dom3AI::addPlayerStart(QList<int> provinces)
+int Dom3AI::getCoastalProvinceCount(QList<int> possibleProvinceList)
 {
-    QFile mapFile(mapFileName);
-    mapFile.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text);
-
-    QTextStream out(&mapFile);
-    out << "#start " << provinces.last() << '\n';
-    mapFile.close();
+    int coastalProvinces = 0;
+    QListIterator<int> provIter(possibleProvinceList);
+    while (provIter.hasNext()) {
+        int province = provIter.next();
+        QListIterator<Dom3AI::TerrainData*> terrainIter(terrainList);
+        while (terrainIter.hasNext()) {
+            Dom3AI::TerrainData* terrainData = terrainIter.next();
+            if (terrainData->province == province && terrainData->coastal) {
+                coastalProvinces++;
+            }
+        }
+    }
+    return coastalProvinces;
 }
 
-void Dom3AI::addAllowedPlayersToMap(QList<Dom3AI::NationStrategy> strategies)
+void Dom3AI::addAllowedPlayersToMap(QList<Dom3AI::NationStrategy> strategies, QList<int> provinces)
 {
     QFile mapFile(mapFileName);
     mapFile.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text);
@@ -754,28 +877,39 @@ void Dom3AI::addAllowedPlayersToMap(QList<Dom3AI::NationStrategy> strategies)
     QTextStream out(&mapFile);
     out << '\n' << '\n';
     for (int i = 0; i < strategies.size(); i++) {
-        out << "#allowedplayer " << strategies[i].number << '\n';
+        out << "#allowedplayer " << strategies[i].nationData.number << '\n';
     }
+
+    NationData playerNation = getPlayerNation();
+    out << "#allowedplayer " << playerNation.number << '\n';
+    out << "#specstart " << playerNation.number << " " << provinces.last() << '\n';
+
+    mapFile.close();
+}
+
+Dom3AI::NationData Dom3AI::getPlayerNation()
+{
     if (ui->eraCombo->currentText() == "Early") {
         for (int i = 0; i < earlyNations.size(); i++) {
             if (earlyNations.at(i).name == ui->playerNationCombo->currentText()) {
-                out << "#allowedplayer " << earlyNations.at(i).number << '\n';
+                return earlyNations.at(i);
             }
         }
     } else if (ui->eraCombo->currentText() == "Middle") {
         for (int i = 0; i < middleNations.size(); i++) {
             if (middleNations.at(i).name == ui->playerNationCombo->currentText()) {
-                out << "#allowedplayer " << middleNations.at(i).number << '\n';
+                return middleNations.at(i);
             }
         }
     } else if (ui->eraCombo->currentText() == "Late") {
         for (int i = 0; i < lateNations.size(); i++) {
             if (lateNations.at(i).name == ui->playerNationCombo->currentText()) {
-                out << "#allowedplayer " << lateNations.at(i).number << '\n';
+                return lateNations.at(i);
             }
         }
     }
-    mapFile.close();
+    // Default player nation
+    return earlyNations.at(0);
 }
 
 void Dom3AI::addStrategiesToMap(QList<Dom3AI::NationStrategy> strategies, QList<int> provinces)
@@ -787,8 +921,8 @@ void Dom3AI::addStrategiesToMap(QList<Dom3AI::NationStrategy> strategies, QList<
     out << '\n' << '\n';
     for (int i = 0; i < strategies.size(); i++) {
         out << "#setland " << provinces[i] << '\n';
-        out << "#specstart " << strategies[i].number << " " << provinces[i] << '\n';
-        out << "#computerplayer " << strategies[i].number << " " << QString::number(ui->difficultyComboBox->currentIndex()+1) << '\n';
+        out << "#specstart " << strategies[i].nationData.number << " " << provinces[i] << '\n';
+        out << "#computerplayer " << strategies[i].nationData.number << " " << QString::number(ui->difficultyComboBox->currentIndex()+1) << '\n';
         QStringListIterator iter(strategies[i].god);
         while (iter.hasNext()) {
             QString line = iter.next();
@@ -991,7 +1125,13 @@ void Dom3AI::writeSettings()
                      if (strList.size() > 1) {
                          NationData data;
                          data.number = strList.at(0).toInt();
-                         data.name = strList.at(1);
+                         if (strList.at(1).startsWith("*")) {
+                             data.coastal = true;
+                             data.name = strList.at(1).mid(1);
+                         } else {
+                             data.coastal = false;
+                             data.name = strList.at(1);
+                         }
                          if (strList.size() > 2) {
                              data.name = data.name + " " + strList.at(2);
                          }
@@ -1045,7 +1185,42 @@ void Dom3AI::readGods()
          dmFile.close();
 
          NationStrategy strategy;
-         strategy.number = nationNumber;
+         bool nationFound = false;
+         // Find nation data
+         NationData nationData;
+         QListIterator<Dom3AI::NationData> iter(earlyNations);
+         while (iter.hasNext()) {
+             NationData nation = iter.next();
+             if (nation.number == nationNumber) {
+                 nationData = nation;
+                 nationFound = true;
+                 break;
+             }
+         }
+         if (!nationFound) {
+             QListIterator<Dom3AI::NationData> iter(middleNations);
+             while (iter.hasNext()) {
+                 NationData nation = iter.next();
+                 if (nation.number == nationNumber) {
+                     nationData = nation;
+                     nationFound = true;
+                     break;
+                 }
+             }
+         }
+         if (!nationFound) {
+             QListIterator<Dom3AI::NationData> iter(lateNations);
+             while (iter.hasNext()) {
+                 NationData nation = iter.next();
+                 if (nation.number == nationNumber) {
+                     nationData = nation;
+                     nationFound = true;
+                     break;
+                 }
+             }
+         }
+
+         strategy.nationData = nationData;
          strategy.god = godLines;
          strategy.dm = dmLines;
          nationStrategies.insert(nationNumber, strategy);

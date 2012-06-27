@@ -32,7 +32,7 @@
 #mag_death 1
 #additem "Lychantropos' Amulet"
 #additem "Amulet of Resilience"
-#additem "Stone Boots"
+#additem "Boots of Stone"
 #additem "Rime Hauberk"
 #additem "Frost Brand"
 #units 10 1310 --Jotun Skinshifter

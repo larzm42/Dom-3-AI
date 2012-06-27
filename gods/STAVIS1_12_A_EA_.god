@@ -14,7 +14,7 @@
 #additem "Charcoal Shield" --FR, fireshield, good shield
 #additem "Lantern Shield" --Fear, good shield
 #additem "Precious" -- +Att/Str
-#additem "Lycanthropos' Amulet" -- Berserk (so it won't cast) + Regen
+#additem "Lychantropos' Amulet" -- Berserk (so it won't cast) + Regen
 #mag_death 6
 #mag_earth 9
 #mag_fire 6
