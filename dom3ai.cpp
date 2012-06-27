@@ -331,7 +331,11 @@ void Dom3AI::on_generateGameButton_clicked()
                     line.append(" (" + mapInfo.baseName() + ")");
                     mapStringName = line.mid(11);
                 }
-                out << line << '\n';
+
+                if (!line.startsWith(("#allies")) &&
+                    !line.startsWith(("#allowedplayer"))) {
+                    out << line << '\n';
+                }
             }
             mapFile.close();
 
@@ -918,8 +922,9 @@ void Dom3AI::addStrategiesToMap(QList<Dom3AI::NationStrategy> strategies, QList<
     mapFile.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text);
 
     QTextStream out(&mapFile);
-    out << '\n' << '\n';
     for (int i = 0; i < strategies.size(); i++) {
+        out << '\n' << '\n';
+        out << "--" << '\n' << "-- " << strategies[i].nationData.name << '\n' << "--" << '\n';
         out << "#setland " << provinces[i] << '\n';
         out << "#specstart " << strategies[i].nationData.number << " " << provinces[i] << '\n';
         out << "#computerplayer " << strategies[i].nationData.number << " " << QString::number(ui->difficultyComboBox->currentIndex()+1) << '\n';
