@@ -963,7 +963,7 @@ void Dom3AI::addStrategiesToMap(QList<Dom3AI::NationStrategy> strategies, QList<
 
 QString Dom3AI::expandRandom(QString command, QString file)
 {
-    QFile nameFile(QDir::current().absolutePath() + "/names/" + file + "_DATA1.txt");
+    QFile nameFile(QCoreApplication::applicationDirPath() + "/names/" + file + "_DATA1.txt");
     if (nameFile.exists()) {
         nameFile.open(QIODevice::ReadOnly);
         QTextStream in(&nameFile);
@@ -1063,7 +1063,7 @@ void Dom3AI::writeSettings()
      ui->dom3Text->setText(settings.value("dom3exe", "").toString());
      settings.endGroup();
 
-     QFile setupFile(QDir::current().absolutePath() + "/settings.txt");
+     QFile setupFile(QCoreApplication::applicationDirPath() + "/settings.txt");
      setupFile.open(QIODevice::ReadOnly);
 
      QTextStream in(&setupFile);
@@ -1160,7 +1160,7 @@ void Dom3AI::writeSettings()
 
 void Dom3AI::readGods()
 {
-    QDir dir(QDir::current().absolutePath() + "/gods");
+    QDir dir(QCoreApplication::applicationDirPath() + "/gods");
     QStringList filters;
     filters << "*.god";
     QList<QFileInfo> info = dir.entryInfoList(filters);
