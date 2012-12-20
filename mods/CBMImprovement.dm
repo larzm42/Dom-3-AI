@@ -110,6 +110,10 @@
 #school -1
 #end
 
+#selectspell "Juggernaut Construction"
+#school -1
+#end
+
 ------------------
 -- Ench 9
 

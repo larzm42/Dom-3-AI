@@ -6,5 +6,6 @@
         <file>mods/Magicrestriction6.dm</file>
         <file>mods/Magicrestriction7.dm</file>
         <file>mods/Magicrestriction8.dm</file>
+        <file>mods/CBMImprovement.dm</file>
     </qresource>
 </RCC>

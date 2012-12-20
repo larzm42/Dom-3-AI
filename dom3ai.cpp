@@ -463,14 +463,24 @@ void Dom3AI::generateGame()
     }
 
     // MR?
-    if (ui->mrCombo->currentIndex() != 0) {
+    if (ui->mrCombo->currentIndex() != 4) {
         createDMFile();
         QFile dmFile(dmFileName);
         dmFile.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text);
         QTextStream out(&dmFile);
 
         QString mrModName;
-        if (ui->mrCombo->currentIndex() == 1) {
+        if (ui->mrCombo->currentIndex() == 0) {
+            QFileInfo exe = QFileInfo(ui->dom3Text->text());
+            QFile cbmInMod (exe.absolutePath() + "/mods/CB1.94.dm");
+            if (!cbmInMod.exists()) {
+                QMessageBox msgBox(QMessageBox::Information, tr("Error"), "You need the Conceptual Balance Complete 1.94 mod installed to use the CBMImprovement option.", 0, this);
+                msgBox.addButton(tr("&Continue"), QMessageBox::RejectRole);
+                msgBox.exec();
+                return;
+            }
+            mrModName = ":/mods/CBMImprovement.dm";
+        } else if (ui->mrCombo->currentIndex() == 1) {
             mrModName = ":/mods/Magicrestriction8.dm";
         } else if (ui->mrCombo->currentIndex() == 2) {
             mrModName = ":/mods/Magicrestriction7.dm";
@@ -508,7 +518,11 @@ void Dom3AI::generateGame()
 
         QString message;
         if (dmInfo.exists()) {
-            message = "First, select Mod Preferences and enable the \"AI Improvement for " + mapFileInfo.baseName() + "\" mod. Then start the game by selecting \"Create a New Game\". Choose the \"" + mapStringName+ "\" map. Hit \"Add New Player\" until no more can be added (no need to select nations). Then select the nation you chose to play. Start the game and you're ready to go!";
+            QString addedInfo = "";
+            if (ui->mrCombo->currentIndex() == 0) {
+                addedInfo = "\"Conceptual Balance Complete 1.94\" followed by the ";
+            }
+            message = "First, select Mod Preferences and enable the "+addedInfo+"\"AI Improvement for " + mapFileInfo.baseName() + "\" mod. Then start the game by selecting \"Create a New Game\". Choose the \"" + mapStringName+ "\" map. Hit \"Add New Player\" until no more can be added (no need to select nations). Then select the nation you chose to play. Start the game and you're ready to go!";
         } else {
             message = "Start the game by selecting \"Create a New Game\". Choose the \"" + mapStringName+ "\" map. Hit \"Add New Player\" until no more can be added (no need to select nations). Then select the nation you chose to play. Start the game and you're ready to go!";
         }
@@ -528,8 +542,17 @@ void Dom3AI::generateGame()
     QFileInfo dmInfo(dmFileName);
     QStringList args;
     args << "--mapfile" << mapInfo.fileName();
+    bool modEnabled = false;
+    if (ui->mrCombo->currentIndex() == 0) {
+        args << "--enablemod" << "CB1.94.dm";
+        modEnabled = true;
+    }
     if (dmInfo.exists()) {
         args << "--enablemod" << dmInfo.fileName();
+        modEnabled = true;
+    }
+    if (!modEnabled) {
+        args << "--enablemod" << " ";
     }
     args << "--era" << QString::number(ui->eraCombo->currentIndex()+1);
 
@@ -555,7 +578,7 @@ void Dom3AI::createDMFile()
         out << "#description \"This is the Dominions 3 AI Improvement Mod. This mod tries to increase the intelligence of the AI in single player games.\"" << '\n';
         out << "#version 1.00" << '\n';
         out << "#icon \"dom3ai.tga\"" << '\n';
-        out << "#domversion 3.27" << '\n';
+        out << "#domversion 3.28" << '\n';
     }
     dmFile.close();
 
