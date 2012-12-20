@@ -740,7 +740,7 @@
           </property>
           <item>
            <property name="text">
-            <string>None</string>
+            <string>CBM Level 8</string>
            </property>
           </item>
           <item>
@@ -756,6 +756,11 @@
           <item>
            <property name="text">
             <string>Level 6</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>None</string>
            </property>
           </item>
          </widget>
