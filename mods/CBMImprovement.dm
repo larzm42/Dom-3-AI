@@ -26271,3 +26271,7 @@ Minotaur Lord
 #selectspell "Soul Gate"
 #school -1
 #end
+
+#selectspell "Second Sun"
+#school -1
+#end
