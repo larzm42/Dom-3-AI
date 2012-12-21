@@ -283,6 +283,11 @@
 
 
 -- Banned Globals
+
+#selectspell "Well of Misery"
+#school -1
+#end
+
 #selectspell "Maelstrom"
 #school -1
 #end
@@ -316,5 +321,9 @@
 #end
 
 #selectspell "Astral Corruption"
+#school -1
+#end
+
+#selectspell "Burden of Time"
 #school -1
 #end
