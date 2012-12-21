@@ -327,3 +327,15 @@
 #selectspell "Burden of Time"
 #school -1
 #end
+
+#selectspell "Illwinter"
+#school -1
+#end
+
+#selectspell "Carrion Woods"
+#school -1
+#end
+
+#selectspell "Soul Gate"
+#school -1
+#end
