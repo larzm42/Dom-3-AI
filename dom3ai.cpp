@@ -443,25 +443,6 @@ void Dom3AI::generateGame()
         addNoIndyToMap();
     }
 
-    // BI?
-    if (ui->betterIndyRadio->isChecked()) {
-        createDMFile();
-        QFile dmFile(dmFileName);
-        dmFile.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text);
-        QTextStream out(&dmFile);
-
-        QFile biFile(":/mods/better_independents_v2-1.dm");
-        biFile.open(QIODevice::ReadOnly);
-
-        QTextStream in(&biFile);
-        QString line;
-
-        while (!in.atEnd()) {
-            line = in.readLine();
-            out << line << '\n';
-        }
-    }
-
     // MR?
     if (ui->mrCombo->currentIndex() != 4) {
         createDMFile();
@@ -492,6 +473,25 @@ void Dom3AI::generateGame()
         mrFile.open(QIODevice::ReadOnly);
 
         QTextStream in(&mrFile);
+        QString line;
+
+        while (!in.atEnd()) {
+            line = in.readLine();
+            out << line << '\n';
+        }
+    }
+
+    // BI?
+    if (ui->betterIndyRadio->isChecked()) {
+        createDMFile();
+        QFile dmFile(dmFileName);
+        dmFile.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text);
+        QTextStream out(&dmFile);
+
+        QFile biFile(":/mods/better_independents_v2-1.dm");
+        biFile.open(QIODevice::ReadOnly);
+
+        QTextStream in(&biFile);
         QString line;
 
         while (!in.atEnd()) {
@@ -542,16 +542,9 @@ void Dom3AI::generateGame()
     QFileInfo dmInfo(dmFileName);
     QStringList args;
     args << "--mapfile" << mapInfo.fileName();
-    bool modEnabled = false;
-    if (ui->mrCombo->currentIndex() == 0) {
-        args << "--enablemod" << "CB1.94.dm";
-        modEnabled = true;
-    }
     if (dmInfo.exists()) {
         args << "--enablemod" << dmInfo.fileName();
-        modEnabled = true;
-    }
-    if (!modEnabled) {
+    } else {
         args << "--enablemod" << " ";
     }
     args << "--era" << QString::number(ui->eraCombo->currentIndex()+1);
