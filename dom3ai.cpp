@@ -77,6 +77,7 @@ QString mapsbcol3 = "200";
 QString mapsbcol4 = "100";
 QString mapnoise = "100";
 QString borderwidth = "15";
+QString indyPercent = "10";
 
 QString mapFileName;
 QString dmFileName;
@@ -92,6 +93,7 @@ Dom3AI::Dom3AI(QWidget *parent) :
     gen.seed(static_cast<unsigned int>(std::time(0)));
     ui->setupUi(this);
     ui->difficultyComboBox->setCurrentIndex(1);
+    ui->researchDiffCombo->setCurrentIndex(1);
     readSettings();
     QListIterator<Dom3AI::NationData> iter(earlyNations);
     while (iter.hasNext()) {
@@ -440,18 +442,25 @@ void Dom3AI::generateGame()
 
     // NI to map?
     if (ui->noIndyRadio->isChecked()) {
-        addNoIndyToMap();
+        addNoIndyToMap(0);
+    }
+
+    // PI to map?
+    if (ui->partialIndyRadio->isChecked()) {
+        addNoIndyToMap(indyPercent);
     }
 
     // MR?
-    if (ui->mrCombo->currentIndex() != 4) {
+    if (ui->mrCombo->currentIndex() != 6) {
         createDMFile();
         QFile dmFile(dmFileName);
         dmFile.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text);
         QTextStream out(&dmFile);
 
         QString mrModName;
-        if (ui->mrCombo->currentIndex() == 0) {
+        if (ui->mrCombo->currentIndex() == 0 ||
+            ui->mrCombo->currentIndex() == 1 ||
+            ui->mrCombo->currentIndex() == 2) {
             QFileInfo exe = QFileInfo(ui->dom3Text->text());
             QFile cbmInMod (exe.absolutePath() + "/mods/CB1.94.dm");
             if (!cbmInMod.exists()) {
@@ -460,13 +469,19 @@ void Dom3AI::generateGame()
                 msgBox.exec();
                 return;
             }
-            mrModName = ":/mods/CBMImprovement.dm";
-        } else if (ui->mrCombo->currentIndex() == 1) {
-            mrModName = ":/mods/Magicrestriction8.dm";
-        } else if (ui->mrCombo->currentIndex() == 2) {
-            mrModName = ":/mods/Magicrestriction7.dm";
-        } else {
-            mrModName = ":/mods/Magicrestriction6.dm";
+            if (ui->mrCombo->currentIndex() == 0) {
+                mrModName = ":/mods/CBM8.dm";
+            } else if (ui->mrCombo->currentIndex() == 1) {
+                mrModName = ":/mods/CBM7.dm";
+            } else if (ui->mrCombo->currentIndex() == 2) {
+                mrModName = ":/mods/CBM6.dm";
+            }
+        } else if (ui->mrCombo->currentIndex() == 3) {
+            mrModName = ":/mods/MR8.dm";
+        } else if (ui->mrCombo->currentIndex() == 4) {
+            mrModName = ":/mods/MR7.dm";
+        } else if (ui->mrCombo->currentIndex() == 5) {
+            mrModName = ":/mods/MR6.dm";
         }
 
         QFile mrFile(mrModName);
@@ -518,11 +533,7 @@ void Dom3AI::generateGame()
 
         QString message;
         if (dmInfo.exists()) {
-            QString addedInfo = "";
-            if (ui->mrCombo->currentIndex() == 0) {
-                addedInfo = "\"Conceptual Balance Complete 1.94\" followed by the ";
-            }
-            message = "First, select Mod Preferences and enable the "+addedInfo+"\"AI Improvement for " + mapFileInfo.baseName() + "\" mod. Then start the game by selecting \"Create a New Game\". Choose the \"" + mapStringName+ "\" map. Hit \"Add New Player\" until no more can be added (no need to select nations). Then select the nation you chose to play. Start the game and you're ready to go!";
+            message = "First, select Mod Preferences and enable the \"AI Improvement for " + mapFileInfo.baseName() + "\" mod. Then start the game by selecting \"Create a New Game\". Choose the \"" + mapStringName+ "\" map. Hit \"Add New Player\" until no more can be added (no need to select nations). Then select the nation you chose to play. Start the game and you're ready to go!";
         } else {
             message = "Start the game by selecting \"Create a New Game\". Choose the \"" + mapStringName+ "\" map. Hit \"Add New Player\" until no more can be added (no need to select nations). Then select the nation you chose to play. Start the game and you're ready to go!";
         }
@@ -547,7 +558,10 @@ void Dom3AI::generateGame()
     } else {
         args << "--enablemod" << " ";
     }
+
     args << "--era" << QString::number(ui->eraCombo->currentIndex()+1);
+
+    args << "--research" << QString::number(ui->researchDiffCombo->currentIndex());
 
     QString program = ui->dom3Text->text();
 
@@ -1013,7 +1027,7 @@ void Dom3AI::addAlliesToMap(QList<QList<int> > teams)
 
 }
 
-void Dom3AI::addNoIndyToMap()
+void Dom3AI::addNoIndyToMap(QString indyPercent)
 {
     QFile mapFile(mapFileName);
     mapFile.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text);
@@ -1022,10 +1036,13 @@ void Dom3AI::addNoIndyToMap()
     out << '\n' << '\n';
 
     const int number_of_vertices = num_vertices(G);
+    random::uniform_int_distribution<> dist(1, 100);
 
     for (int i = 1; i <= number_of_vertices; i++) {
-        out << "#setland " << i << '\n';
-        out << "#poptype 99" << '\n';
+        if (dist(gen) > indyPercent.toInt()) {
+            out << "#setland " << i << '\n';
+            out << "#poptype 99" << '\n';
+        }
     }
     mapFile.close();
 
@@ -1141,6 +1158,8 @@ void Dom3AI::writeSettings()
                          mapnoise = strList.at(1);
                      } else if (strList.at(0).startsWith("borderwidth")) {
                          borderwidth = strList.at(1);
+                     } else if (strList.at(0).startsWith("indypercent")) {
+                         indyPercent = strList.at(1);
                      }
                  } else {
                      if (strList.size() > 1) {

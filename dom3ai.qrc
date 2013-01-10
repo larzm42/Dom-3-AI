@@ -3,9 +3,11 @@
         <file>dom3ai.tga</file>
         <file>eater.png</file>
         <file>mods/better_independents_v2-1.dm</file>
-        <file>mods/Magicrestriction6.dm</file>
-        <file>mods/Magicrestriction7.dm</file>
-        <file>mods/Magicrestriction8.dm</file>
-        <file>mods/CBMImprovement.dm</file>
+        <file>mods/CBM6.dm</file>
+        <file>mods/CBM7.dm</file>
+        <file>mods/CBM8.dm</file>
+        <file>mods/MR6.dm</file>
+        <file>mods/MR7.dm</file>
+        <file>mods/MR8.dm</file>
     </qresource>
 </RCC>

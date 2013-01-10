@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>523</width>
-    <height>613</height>
+    <height>666</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -684,6 +684,23 @@
        </layout>
       </item>
       <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_14">
+        <item>
+         <widget class="QRadioButton" name="partialIndyRadio">
+          <property name="font">
+           <font>
+            <weight>50</weight>
+            <bold>false</bold>
+           </font>
+          </property>
+          <property name="text">
+           <string>Partial Recruitable Independents</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
        <layout class="QHBoxLayout" name="horizontalLayout_8">
         <item>
          <widget class="QRadioButton" name="betterIndyRadio">
@@ -740,22 +757,32 @@
           </property>
           <item>
            <property name="text">
-            <string>CBM Level 8</string>
+            <string>CBM for Single Player Level 8</string>
            </property>
           </item>
           <item>
            <property name="text">
-            <string>Level 8</string>
+            <string>CBM for Single Player Level 7</string>
            </property>
           </item>
           <item>
            <property name="text">
-            <string>Level 7</string>
+            <string>CBM for Single Player Level 6</string>
            </property>
           </item>
           <item>
            <property name="text">
-            <string>Level 6</string>
+            <string>Vanilla for Single Player Level 8</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Vanilla for Single Player Level 7</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Vanilla for Single Player Level 6</string>
            </property>
           </item>
           <item>
@@ -767,6 +794,66 @@
         </item>
         <item>
          <spacer name="horizontalSpacer_6">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_15">
+        <item>
+         <widget class="QLabel" name="label_8">
+          <property name="font">
+           <font>
+            <weight>50</weight>
+            <bold>false</bold>
+           </font>
+          </property>
+          <property name="text">
+           <string>Research Difficulty:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QComboBox" name="researchDiffCombo">
+          <property name="font">
+           <font>
+            <weight>50</weight>
+            <bold>false</bold>
+           </font>
+          </property>
+          <item>
+           <property name="text">
+            <string>Easy</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Normal</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Difficult</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Very Difficult</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer_10">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
           </property>

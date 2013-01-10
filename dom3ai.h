@@ -98,7 +98,7 @@ private:
     void addStrategiesToDm(QList<Dom3AI::NationStrategy> strategies);
     void createDMFile();
     void addAlliesToMap(QList<QList<int> > teams);
-    void addNoIndyToMap();
+    void addNoIndyToMap(QString indyPercent);
     bool place(QList<int> * possibleProvinceList, QList<int> * chosenProvinces, uint minDistance, int numNations, int coastalStarts);
     bool tryToPlace(QList<int> * possibleProvinceList, QList<int> * chosenProvinces, uint minDistance, int coastalStarts);
     QString expandRandom(QString command, QString file);

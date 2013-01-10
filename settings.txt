@@ -14,6 +14,7 @@ mapbcol 100 200 20 100
 mapsbcol 40 120 200 100
 mapnoise 100
 borderwidth 15
+indypercent 10
 
 -- Define the possible nations for each era. To add a mod nation, just include
 -- it's name along with nation number in the proper era. A * infront of the name
