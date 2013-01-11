@@ -192,7 +192,7 @@
 #selectspell "Undead Mastery"
 #school -1
 #end
-#
+
 
 ----------------------- 
 -- Blood Level 9
@@ -385,10 +385,6 @@
 #end
 
 #selectspell "Soul Gate"
-#school -1
-#end
-
-#selectspell "Open the Seal"
 #school -1
 #end
 

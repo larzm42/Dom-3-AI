@@ -977,10 +977,6 @@
 #school -1
 #end
 
-#selectspell "Open the Seal"
-#school -1
-#end
-
 #selectspell "Forge of the Ancients"
 #school -1
 #end

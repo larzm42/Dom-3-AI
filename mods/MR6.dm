@@ -425,7 +425,7 @@
 #selectspell "Living Earth"
 #school -1
 #end
-#
+
 #selectspell "Summon Mound Fiend"
 #school -1
 #end
@@ -1328,10 +1328,6 @@
 #end
 
 #selectspell "Soul Gate"
-#school -1
-#end
-
-#selectspell "Open the Seal"
 #school -1
 #end
 
