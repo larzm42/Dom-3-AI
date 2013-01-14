@@ -19,6 +19,7 @@
 #include <QWidget>
 #include <QProgressDialog>
 #include <QMultiMap>
+#include <QtCore/QTextStream>
 
 namespace Ui {
 class Dom3AI;
@@ -103,6 +104,7 @@ private:
     bool tryToPlace(QList<int> * possibleProvinceList, QList<int> * chosenProvinces, uint minDistance, int coastalStarts);
     QString expandRandom(QString command, QString file);
     bool isMapValid(QString fileName);
+    void appendFile(QString fileName, QTextStream * out);
 
     enum SetupSection {
         None,

@@ -469,6 +469,19 @@ void Dom3AI::generateGame()
                 msgBox.exec();
                 return;
             }
+
+            appendFile(":/mods/CBM.dm", &out);
+//            QFile mrFile(":/mods/CBM.dm");
+//            mrFile.open(QIODevice::ReadOnly);
+
+//            QTextStream in(&mrFile);
+//            QString line;
+
+//            while (!in.atEnd()) {
+//                line = in.readLine();
+//                out << line << '\n';
+//            }
+
             if (ui->mrCombo->currentIndex() == 0) {
                 mrModName = ":/mods/CBM8.dm";
             } else if (ui->mrCombo->currentIndex() == 1) {
@@ -484,16 +497,17 @@ void Dom3AI::generateGame()
             mrModName = ":/mods/MR6.dm";
         }
 
-        QFile mrFile(mrModName);
-        mrFile.open(QIODevice::ReadOnly);
+        appendFile(mrModName, &out);
+//        QFile mrFile(mrModName);
+//        mrFile.open(QIODevice::ReadOnly);
 
-        QTextStream in(&mrFile);
-        QString line;
+//        QTextStream in(&mrFile);
+//        QString line;
 
-        while (!in.atEnd()) {
-            line = in.readLine();
-            out << line << '\n';
-        }
+//        while (!in.atEnd()) {
+//            line = in.readLine();
+//            out << line << '\n';
+//        }
     }
 
     // BI?
@@ -503,16 +517,17 @@ void Dom3AI::generateGame()
         dmFile.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text);
         QTextStream out(&dmFile);
 
-        QFile biFile(":/mods/better_independents_v2-1.dm");
-        biFile.open(QIODevice::ReadOnly);
+        appendFile(":/mods/better_independents_v2-1.dm", &out);
+//        QFile biFile(":/mods/better_independents_v2-1.dm");
+//        biFile.open(QIODevice::ReadOnly);
 
-        QTextStream in(&biFile);
-        QString line;
+//        QTextStream in(&biFile);
+//        QString line;
 
-        while (!in.atEnd()) {
-            line = in.readLine();
-            out << line << '\n';
-        }
+//        while (!in.atEnd()) {
+//            line = in.readLine();
+//            out << line << '\n';
+//        }
     }
 
     // Add the strategies
@@ -569,6 +584,20 @@ void Dom3AI::generateGame()
     QFileInfo exe = QFileInfo(program);
     myProcess->setWorkingDirectory(exe.absolutePath());
     myProcess->start(program, args);
+}
+
+void Dom3AI::appendFile(QString fileName, QTextStream * outPtr) {
+    QFile inFile(fileName);
+    inFile.open(QIODevice::ReadOnly);
+
+    QTextStream in(&inFile);
+    QString line;
+
+    while (!in.atEnd()) {
+        line = in.readLine();
+        outPtr->operator << (line) << '\n';
+    }
+
 }
 
 void Dom3AI::createDMFile()

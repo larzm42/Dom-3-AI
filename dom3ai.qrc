@@ -9,5 +9,6 @@
         <file>mods/MR6.dm</file>
         <file>mods/MR7.dm</file>
         <file>mods/MR8.dm</file>
+        <file>mods/CBM.dm</file>
     </qresource>
 </RCC>
